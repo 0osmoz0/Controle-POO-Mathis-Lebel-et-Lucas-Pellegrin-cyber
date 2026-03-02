@@ -1,0 +1,6 @@
+# Build
+redteam-tool/target/
+target/
+
+# Wordlist trop lourde pour le repo sans LFS (télécharger à part ou utiliser après "git lfs install")
+redteam-tool/src/main/resources/wordlists/rockyou.txt

@@ -1,8 +1,5 @@
 package fr.redteam.c2;
 
-/**
- * Modèle représentant un beacon (agent) connecté au C2.
- */
 public class Beacon {
 
     private String id;
