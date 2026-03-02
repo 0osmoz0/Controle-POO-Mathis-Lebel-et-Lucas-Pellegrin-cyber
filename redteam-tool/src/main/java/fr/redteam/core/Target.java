@@ -1,8 +1,4 @@
 package fr.redteam.core;
-
-/**
- * Représente une cible (host, port) pour les opérations de scan ou d'attaque.
- */
 public class Target {
 
     private String host;
