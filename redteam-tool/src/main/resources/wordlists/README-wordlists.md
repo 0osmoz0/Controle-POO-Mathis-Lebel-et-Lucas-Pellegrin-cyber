@@ -1,5 +1,7 @@
 # Wordlists (téléchargées depuis GitHub)
 
+**Git LFS** : les `*.txt` de ce dossier sont suivis via `.gitattributes` (LFS). Pour utiliser LFS : `git lfs install` puis ajouter les gros fichiers. `rockyou.txt` est dans `.gitignore` (trop lourd pour GitHub sans LFS) ; le télécharger à part ou l’ajouter avec LFS.
+
 ## Fichiers présents
 
 | Fichier | Source | Usage |
