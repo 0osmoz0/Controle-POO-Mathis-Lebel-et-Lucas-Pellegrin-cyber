@@ -18,6 +18,7 @@ import java.util.List;
 public class HashCracker implements Module {
 
     private static final String WORDLIST_PATH = "/wordlists/passwords.txt";
+    private static final String ROCKYOU_PATH = "/wordlists/rockyou.txt";
 
     @Override
     public String getName() {
@@ -31,21 +32,25 @@ public class HashCracker implements Module {
 
     @Override
     public void run(Target target, Report report) {
-        String hashFilePath = target.getHost();
-        if (hashFilePath == null || hashFilePath.isEmpty()) {
-            report.addFinding("HashCracker", "Chemin du fichier de hashes non renseigné (utiliser Target.host)");
+        String input = target.getHost();
+        if (input == null || input.isEmpty()) {
+            report.addFinding("HashCracker", "Indiquez un hash MD5/SHA1 ou le chemin d'un fichier de hashes (un par ligne).");
             return;
         }
+        input = input.trim();
 
-        List<String> hashes = loadHashesFromFile(hashFilePath);
+        List<String> hashes = loadHashesFromFile(input);
+        if (hashes.isEmpty() && looksLikeHash(input)) {
+            hashes = List.of(input.toLowerCase());
+        }
         if (hashes.isEmpty()) {
-            report.addFinding("HashCracker", "Aucun hash trouvé dans " + hashFilePath);
+            report.addFinding("HashCracker", "Aucun hash valide. Donnez un hash MD5 (32 car. hex) / SHA1 (40 car. hex) ou un chemin vers un fichier.");
             return;
         }
 
         List<String> wordlist = loadWordlist();
         if (wordlist.isEmpty()) {
-            report.addFinding("HashCracker", "Wordlist vide ou introuvable: " + WORDLIST_PATH + " (placez rockyou.txt ou une wordlist dans src/main/resources/wordlists/passwords.txt)");
+            report.addFinding("HashCracker", "Wordlist vide. Placez rockyou.txt ou passwords.txt dans src/main/resources/wordlists/");
             return;
         }
 
@@ -64,6 +69,12 @@ public class HashCracker implements Module {
         }
     }
 
+    private static boolean looksLikeHash(String s) {
+        if (s == null) return false;
+        String t = s.trim().toLowerCase();
+        return (t.length() == 32 && t.matches("[0-9a-f]{32}")) || (t.length() == 40 && t.matches("[0-9a-f]{40}"));
+    }
+
     private List<String> loadHashesFromFile(String path) {
         List<String> lines = new ArrayList<>();
         try {
@@ -78,8 +89,16 @@ public class HashCracker implements Module {
     }
 
     private List<String> loadWordlist() {
+        List<String> words = loadWordlistFromPath(ROCKYOU_PATH);
+        if (words.isEmpty()) {
+            words = loadWordlistFromPath(WORDLIST_PATH);
+        }
+        return words;
+    }
+
+    private List<String> loadWordlistFromPath(String resourcePath) {
         List<String> words = new ArrayList<>();
-        try (InputStream is = getClass().getResourceAsStream(WORDLIST_PATH)) {
+        try (InputStream is = getClass().getResourceAsStream(resourcePath)) {
             if (is == null) return words;
             try (BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
                 String line;
