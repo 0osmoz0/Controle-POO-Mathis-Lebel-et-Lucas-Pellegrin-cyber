@@ -198,6 +198,93 @@ public class RedTeamCli {
         }
     }
 
+    private void runQrCodeGenerator(Scanner scan) {
+        System.out.println(Ansi.CYAN + "\n  " + SEP_THIN + Ansi.RESET);
+        System.out.println(Ansi.bold("  QR Code Generator"));
+        System.out.println(Ansi.CYAN + "  " + SEP_THIN + Ansi.RESET);
+        System.out.print("  URL cible (ex. http://localhost:8080) › ");
+        String url = scan.nextLine();
+        if (url != null) url = url.trim();
+        Target target = new Target(url != null ? url : "", -1);
+        Report report = new DefaultReport();
+        modules.get("qrcodegenerator").run(target, report);
+        System.out.println(Ansi.CYAN + "\n  " + SEP_THIN + Ansi.RESET);
+        reporter.output(report);
+    }
+
+    private void runSubdomainTakeover(Scanner scan) {
+        System.out.println(Ansi.CYAN + "\n  " + SEP_THIN + Ansi.RESET);
+        System.out.println(Ansi.bold("  Subdomain Takeover Checker"));
+        System.out.println(Ansi.CYAN + "  " + SEP_THIN + Ansi.RESET);
+        System.out.print("  Domaine cible (ex. example.com) › ");
+        String domain = scan.nextLine();
+        if (domain != null) domain = domain.trim();
+        Target target = new Target(domain != null ? domain : "", -1);
+        Report report = new DefaultReport();
+        modules.get("subdomaintakeoverchecker").run(target, report);
+        System.out.println(Ansi.CYAN + "\n  " + SEP_THIN + Ansi.RESET);
+        reporter.output(report);
+    }
+
+    private void startUrlShortener(Scanner scan) {
+        System.out.println(Ansi.CYAN + "\n  " + SEP_THIN + Ansi.RESET);
+        System.out.println(Ansi.bold("  URL Shortener"));
+        System.out.println(Ansi.CYAN + "  " + SEP_THIN + Ansi.RESET);
+        System.out.print("  URL de destination (ex. http://localhost:8080) › ");
+        String destUrl = scan.nextLine();
+        if (destUrl == null || destUrl.trim().isEmpty()) {
+            System.out.println(Ansi.red("  ✗ URL vide."));
+            return;
+        }
+        destUrl = destUrl.trim();
+        if (!destUrl.startsWith("http://") && !destUrl.startsWith("https://")) destUrl = "http://" + destUrl;
+        int port = 9090;
+        try {
+            UrlShortener.startServer(port, destUrl);
+            String shortUrl = UrlShortener.getShortUrl(port);
+            System.out.println(Ansi.GREEN + "\n  " + SEP + Ansi.RESET);
+            System.out.println(Ansi.bold("  ✓ Serveur démarré"));
+            System.out.println(Ansi.GREEN + "  " + SEP_THIN + Ansi.RESET);
+            System.out.println("  " + Ansi.cyan("URL courte") + " › " + Ansi.bold(shortUrl));
+            System.out.println("  " + Ansi.cyan("Redirige vers") + " › " + destUrl);
+            System.out.println(Ansi.dim("  Les clics s'afficheront ici."));
+            System.out.println(Ansi.CYAN + "  " + SEP_THIN + Ansi.RESET);
+            System.out.print(Ansi.dim("  [Entrée] pour revenir au menu › "));
+            scan.nextLine();
+            UrlShortener.stopServer();
+        } catch (Exception e) {
+            System.out.println(Ansi.red("  ✗ Erreur: " + e.getMessage()));
+        }
+    }
+
+    private void runPasswordStrength(Scanner scan) {
+        System.out.println(Ansi.CYAN + "\n  " + SEP_THIN + Ansi.RESET);
+        System.out.println(Ansi.bold("  Password Strength Analyzer"));
+        System.out.println(Ansi.CYAN + "  " + SEP_THIN + Ansi.RESET);
+        System.out.print("  Mot de passe à analyser › ");
+        String password = scan.nextLine();
+        if (password != null) password = password.trim();
+        Target target = new Target(password != null ? password : "", -1);
+        Report report = new DefaultReport();
+        modules.get("passwordstrengthanalyzer").run(target, report);
+        System.out.println(Ansi.CYAN + "\n  " + SEP_THIN + Ansi.RESET);
+        reporter.output(report);
+    }
+
+    private void runHomographGenerator(Scanner scan) {
+        System.out.println(Ansi.CYAN + "\n  " + SEP_THIN + Ansi.RESET);
+        System.out.println(Ansi.bold("  Homograph Domain Generator"));
+        System.out.println(Ansi.CYAN + "  " + SEP_THIN + Ansi.RESET);
+        System.out.print("  Domaine cible (ex. google.com) › ");
+        String domain = scan.nextLine();
+        if (domain != null) domain = domain.trim();
+        Target target = new Target(domain != null ? domain : "", -1);
+        Report report = new DefaultReport();
+        modules.get("homographgenerator").run(target, report);
+        System.out.println(Ansi.CYAN + "\n  " + SEP_THIN + Ansi.RESET);
+        reporter.output(report);
+    }
+
     private static int parseInt(String s, int def) {
         if (s == null || s.isEmpty()) return def;
         try {

@@ -26,6 +26,7 @@ public class UrlShortener implements Module {
     private static final Map<String, RedirectEntry> redirects = new ConcurrentHashMap<>();
     private static final List<ClickLog> clickLogs = new ArrayList<>();
     private static HttpServer server;
+    private static String lastShortId;
 
     @Override
     public String getName() {
@@ -59,7 +60,8 @@ public class UrlShortener implements Module {
     }
 
     public static void startServer(int port, String destUrl) throws IOException {
-        String id = "r" + System.currentTimeMillis() % 10000;
+        String id = "r" + (System.currentTimeMillis() % 100000);
+        lastShortId = id;
         redirects.put(id, new RedirectEntry(destUrl));
 
         server = HttpServer.create(new InetSocketAddress("127.0.0.1", port), 0);
@@ -100,8 +102,7 @@ public class UrlShortener implements Module {
     }
 
     public static String getShortUrl(int port) {
-        if (redirects.isEmpty()) return "http://127.0.0.1:" + port;
-        String id = redirects.keySet().iterator().next();
+        String id = lastShortId != null ? lastShortId : (redirects.isEmpty() ? "" : redirects.keySet().iterator().next());
         return "http://127.0.0.1:" + port + "/" + id;
     }
 

@@ -10,9 +10,9 @@ public class ConsoleReporter implements Reporter {
         if (report == null) return;
         for (String finding : report.getFindings()) {
             String line = "  " + finding;
-            if (finding.contains("CRACKED:")) {
+            if (finding.contains("CRACKED:") || finding.contains("POTENTIEL TAKEOVER") || finding.contains("✓ ")) {
                 System.out.println(Ansi.GREEN + line + Ansi.RESET);
-            } else if (finding.contains("Non trouvé") || finding.contains("vide") || finding.contains("introuvable")) {
+            } else if (finding.contains("Non trouvé") || finding.contains("vide") || finding.contains("introuvable") || finding.contains("✗")) {
                 System.out.println(Ansi.YELLOW + line + Ansi.RESET);
             } else {
                 System.out.println(Ansi.dim(line));

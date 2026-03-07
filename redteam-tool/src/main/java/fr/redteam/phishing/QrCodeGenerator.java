@@ -1,27 +1,22 @@
 package fr.redteam.phishing;
 
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.EncodeHintType;
-import com.google.zxing.WriterException;
-import com.google.zxing.client.j2se.MatrixToImageWriter;
-import com.google.zxing.common.BitMatrix;
-import com.google.zxing.qrcode.QRCodeWriter;
-import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import fr.redteam.core.Module;
 import fr.redteam.core.Report;
 import fr.redteam.core.Target;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
- * Génère un QR code pointant vers une URL (ex. page phishing).
+ * Génère un QR code pointant vers une URL (via API publique, pas de dépendance).
  */
 public class QrCodeGenerator implements Module {
+
+    private static final String QR_API = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=";
 
     @Override
     public String getName() {
@@ -45,26 +40,29 @@ public class QrCodeGenerator implements Module {
             url = "http://" + url;
         }
 
-        String outPath = "qrcode_phishing.png";
+        String encoded = URLEncoder.encode(url, StandardCharsets.UTF_8);
+        String qrApiUrl = QR_API + encoded;
+
+        String outPath = "qrcode_phishing.html";
         try {
             Path output = Paths.get(outPath).toAbsolutePath();
-            generateQrCode(url, output, 300, 300);
-            report.addFinding("QrCodeGenerator", "QR code généré: " + output);
+            String html = "<!DOCTYPE html><html><head><meta charset='UTF-8'><title>QR Code</title></head><body style='font-family:sans-serif;text-align:center;padding:2rem;'>"
+                    + "<h1>QR Code - Scannez avec votre téléphone</h1>"
+                    + "<img src='" + qrApiUrl.replace("'", "&#39;") + "' alt='QR Code'/>"
+                    + "<p>URL: " + escapeHtml(url) + "</p>"
+                    + "<p><a href='" + escapeHtml(qrApiUrl) + "'>Télécharger l'image PNG</a></p>"
+                    + "</body></html>";
+            Files.writeString(output, html);
+            report.addFinding("QrCodeGenerator", "Fichier généré: " + output);
+            report.addFinding("QrCodeGenerator", "Ouvrez ce fichier HTML dans un navigateur pour afficher le QR code.");
             report.addFinding("QrCodeGenerator", "URL encodée: " + url);
-            report.addFinding("QrCodeGenerator", "Utilisez ce QR pour des tests physiques (stickers, affiches).");
-        } catch (Exception e) {
+        } catch (IOException e) {
             report.addFinding("QrCodeGenerator", "Erreur: " + e.getMessage());
         }
     }
 
-    public Path generateQrCode(String url, Path outputPath, int width, int height) throws WriterException, IOException {
-        Map<EncodeHintType, Object> hints = new HashMap<>();
-        hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.H);
-        hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
-
-        QRCodeWriter writer = new QRCodeWriter();
-        BitMatrix matrix = writer.encode(url, BarcodeFormat.QR_CODE, width, height, hints);
-        MatrixToImageWriter.writeToPath(matrix, "PNG", outputPath);
-        return outputPath;
+    private static String escapeHtml(String s) {
+        if (s == null) return "";
+        return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;");
     }
 }
