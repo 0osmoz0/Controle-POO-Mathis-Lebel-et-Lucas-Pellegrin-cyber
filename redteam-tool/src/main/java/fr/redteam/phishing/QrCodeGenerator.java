@@ -1,25 +1,22 @@
 package fr.redteam.phishing;
 
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.EncodeHintType;
-import com.google.zxing.WriterException;
-import com.google.zxing.common.BitMatrix;
-import com.google.zxing.qrcode.QRCodeWriter;
-import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import fr.redteam.core.Module;
 import fr.redteam.core.Report;
 import fr.redteam.core.Target;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Map;
 
 /**
- * Génère un QR code pointant vers une URL (ZXing + API publique pour HTML).
+ * Génère un QR code pointant vers une URL (API publique + ImageIO pour affichage CLI).
  */
 public class QrCodeGenerator implements Module {
 
@@ -74,7 +71,8 @@ public class QrCodeGenerator implements Module {
     }
 
     /**
-     * Génère un QR code et le retourne en ASCII/Unicode pour affichage dans le terminal.
+     * Génère un QR code via l'API et le retourne en ASCII/Unicode pour affichage dans le terminal.
+     * Utilise ImageIO (JDK) et l'API qrserver.com - aucune dépendance externe.
      * @param url URL à encoder
      * @return chaîne multiligne représentant le QR (blocs Unicode █ et espace), ou null en cas d'erreur
      */
@@ -83,29 +81,28 @@ public class QrCodeGenerator implements Module {
         url = url.trim();
         if (!url.startsWith("http://") && !url.startsWith("https://")) url = "http://" + url;
         try {
-            QRCodeWriter writer = new QRCodeWriter();
-            Map<EncodeHintType, Object> hints = Map.of(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
-            BitMatrix matrix = writer.encode(url, BarcodeFormat.QR_CODE, 80, 80, hints);
-            int width = matrix.getWidth();
-            int height = matrix.getHeight();
-            // Réduire pour le terminal (~20-25 caractères de large)
-            int block = Math.max(2, Math.min(width, height) / 20);
-            StringBuilder sb = new StringBuilder();
-            for (int y = 0; y < height; y += block) {
-                for (int x = 0; x < width; x += block) {
-                    boolean black = false;
-                    for (int dy = 0; dy < block && y + dy < height; dy++) {
-                        for (int dx = 0; dx < block && x + dx < width; dx++) {
-                            if (matrix.get(x + dx, y + dy)) { black = true; break; }
-                        }
-                        if (black) break;
+            // Image 120x120 : ~5 px/module pour un QR 21x21, permet un échantillonnage précis
+            String apiUrl = QR_API.replace("300x300", "120x120") + URLEncoder.encode(url, StandardCharsets.UTF_8);
+            try (InputStream in = new URL(apiUrl).openStream()) {
+                BufferedImage img = ImageIO.read(in);
+                if (img == null) return null;
+                int w = img.getWidth();
+                int h = img.getHeight();
+                // 1 module QR ≈ 5 pixels ; échantillonner le centre de chaque bloc pour éviter le flou
+                int block = 5;
+                StringBuilder sb = new StringBuilder();
+                for (int y = block / 2; y < h; y += block) {
+                    for (int x = block / 2; x < w; x += block) {
+                        int rgb = img.getRGB(x, y);
+                        int gray = ((rgb >> 16) & 0xFF) + ((rgb >> 8) & 0xFF) + (rgb & 0xFF);
+                        boolean black = gray < 400; // seuil pour noir (0) vs blanc (765)
+                        sb.append(black ? "██" : "  ");
                     }
-                    sb.append(black ? "██" : "  ");
+                    sb.append("\n");
                 }
-                sb.append("\n");
+                return sb.toString();
             }
-            return sb.toString();
-        } catch (WriterException e) {
+        } catch (IOException e) {
             return null;
         }
     }
