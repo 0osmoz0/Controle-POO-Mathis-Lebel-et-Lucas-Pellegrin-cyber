@@ -122,25 +122,19 @@ public class RedTeamCli {
                 System.out.println(Ansi.CYAN + "\n  " + SEP + Ansi.RESET);
                 System.out.println(Ansi.bold("  MENU PRINCIPAL"));
                 System.out.println(Ansi.CYAN + "  " + SEP_THIN + Ansi.RESET);
-                System.out.println("  " + Ansi.green("[1]") + " Démarrer serveur phishing " + Ansi.dim("(HTTP 127.0.0.1:8080)"));
+                System.out.println("  " + Ansi.green("[1]") + " Phishing " + Ansi.dim("(serveur, QR, shortener, homograph)"));
                 System.out.println("  " + Ansi.green("[2]") + " HashCracker " + Ansi.dim("(crack MD5/SHA1 par wordlist)"));
-                System.out.println("  " + Ansi.green("[3]") + " QR Code Generator " + Ansi.dim("(génère QR vers URL)"));
-                System.out.println("  " + Ansi.green("[4]") + " Subdomain Takeover " + Ansi.dim("(détecte vulnérabilités)"));
-                System.out.println("  " + Ansi.green("[5]") + " URL Shortener " + Ansi.dim("(tracking des clics)"));
-                System.out.println("  " + Ansi.green("[6]") + " Password Strength " + Ansi.dim("(analyse force)"));
-                System.out.println("  " + Ansi.green("[7]") + " Homograph Generator " + Ansi.dim("(domaines lookalike)"));
+                System.out.println("  " + Ansi.green("[3]") + " Subdomain Takeover " + Ansi.dim("(détecte vulnérabilités)"));
+                System.out.println("  " + Ansi.green("[4]") + " Password Strength " + Ansi.dim("(analyse force)"));
                 System.out.println(Ansi.CYAN + "  " + SEP_THIN + Ansi.RESET);
                 System.out.print("  " + Ansi.bold("Choix") + " › ");
                 String line = scan.nextLine();
                 if (line == null) break;
                 line = line.trim();
-                if ("1".equals(line)) { startPhishingServer(scan); continue; }
+                if ("1".equals(line)) { runPhishingMenu(scan); continue; }
                 if ("2".equals(line)) { runHashCracker(scan); continue; }
-                if ("3".equals(line)) { runQrCodeGenerator(scan); continue; }
-                if ("4".equals(line)) { runSubdomainTakeover(scan); continue; }
-                if ("5".equals(line)) { startUrlShortener(scan); continue; }
-                if ("6".equals(line)) { runPasswordStrength(scan); continue; }
-                if ("7".equals(line)) { runHomographGenerator(scan); continue; }
+                if ("3".equals(line)) { runSubdomainTakeover(scan); continue; }
+                if ("4".equals(line)) { runPasswordStrength(scan); continue; }
                 System.out.println(Ansi.red("  ✗ Choix invalide."));
             }
         }
@@ -161,6 +155,30 @@ public class RedTeamCli {
         System.out.println(Ansi.bold("  Rapport HashCracker"));
         System.out.println(Ansi.CYAN + "  " + SEP_THIN + Ansi.RESET);
         reporter.output(report);
+    }
+
+    private void runPhishingMenu(Scanner scan) {
+        while (true) {
+            System.out.println(Ansi.CYAN + "\n  " + SEP_THIN + Ansi.RESET);
+            System.out.println(Ansi.bold("  Phishing"));
+            System.out.println(Ansi.CYAN + "  " + SEP_THIN + Ansi.RESET);
+            System.out.println("  " + Ansi.green("[1]") + " Serveur phishing " + Ansi.dim("(Netflix/Instagram)"));
+            System.out.println("  " + Ansi.green("[2]") + " QR Code Generator " + Ansi.dim("(génère QR vers URL)"));
+            System.out.println("  " + Ansi.green("[3]") + " URL Shortener " + Ansi.dim("(tracking des clics)"));
+            System.out.println("  " + Ansi.green("[4]") + " Homograph Generator " + Ansi.dim("(domaines lookalike)"));
+            System.out.println("  " + Ansi.dim("[0] Retour"));
+            System.out.println(Ansi.CYAN + "  " + SEP_THIN + Ansi.RESET);
+            System.out.print("  " + Ansi.bold("Choix") + " › ");
+            String choice = scan.nextLine();
+            if (choice == null) break;
+            choice = choice.trim();
+            if ("0".equals(choice)) break;
+            if ("1".equals(choice)) { startPhishingServer(scan); continue; }
+            if ("2".equals(choice)) { runQrCodeGenerator(scan); continue; }
+            if ("3".equals(choice)) { startUrlShortener(scan); continue; }
+            if ("4".equals(choice)) { runHomographGenerator(scan); continue; }
+            System.out.println(Ansi.red("  ✗ Choix invalide."));
+        }
     }
 
     private void startPhishingServer(Scanner scan) {
