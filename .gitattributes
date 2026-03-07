@@ -1,0 +1,2 @@
+# Git LFS : wordlists volumineuses
+redteam-tool/src/main/resources/wordlists/*.txt filter=lfs diff=lfs merge=lfs -text
