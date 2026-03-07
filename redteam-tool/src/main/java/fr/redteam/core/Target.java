@@ -1,4 +1,5 @@
 package fr.redteam.core;
+
 public class Target {
 
     private String host;

@@ -4,10 +4,6 @@ import fr.redteam.core.Module;
 import fr.redteam.core.Report;
 import fr.redteam.core.Target;
 
-/**
- * Construction / injection de payload dans un APK (reverse shell, beacon, etc.).
- * Target = listener (host + port) où le payload se connectera.
- */
 public class ApkPayloadBuilder implements Module {
 
     private PayloadConfig config;

@@ -7,10 +7,6 @@ import fr.redteam.core.Target;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Serveur de téléchargement pour distribuer APK / binaires aux cibles.
- * Target = host et port d'écoute du serveur.
- */
 public class DownloadServer implements Module {
 
     private final List<String> servePaths = new ArrayList<>();
@@ -46,25 +42,16 @@ public class DownloadServer implements Module {
         }
     }
 
-    /**
-     * Ajoute un chemin de fichier (APK ou binaire) à servir.
-     */
     public void addServePath(String path) {
         if (path != null && !path.trim().isEmpty()) {
             servePaths.add(path.trim());
         }
     }
-
-    /**
-     * Retourne la liste des chemins configurés pour le téléchargement.
-     */
+    
     public List<String> getServePaths() {
         return new ArrayList<>(servePaths);
     }
 
-    /**
-     * Vide la liste des fichiers à servir.
-     */
     public void clearServePaths() {
         servePaths.clear();
     }

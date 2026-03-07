@@ -1,8 +1,5 @@
 package fr.redteam.payload;
 
-/**
- * Configuration pour la génération de payloads (listener, sortie, etc.).
- */
 public class PayloadConfig {
 
     private String listenerHost;

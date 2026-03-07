@@ -4,10 +4,6 @@ import fr.redteam.core.Module;
 import fr.redteam.core.Report;
 import fr.redteam.core.Target;
 
-/**
- * Module serveur de phishing : sert la page de login et collecte les credentials.
- * Target = host et port d'écoute du serveur.
- */
 public class PhishingServer implements Module {
 
     private final PhishingPageGenerator pageGenerator = new PhishingPageGenerator();
@@ -45,9 +41,7 @@ public class PhishingServer implements Module {
         }
     }
 
-    /**
-     * Retourne la page HTML générée (pour la servir via un vrai serveur HTTP).
-     */
+    
     public String getLoginPageHtml(String title, String formAction) {
         return pageGenerator.generate(title, formAction, "Accès sécurisé.");
     }

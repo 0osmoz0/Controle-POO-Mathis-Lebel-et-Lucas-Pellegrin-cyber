@@ -7,11 +7,6 @@ import fr.redteam.core.Target;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Récupération des credentials soumis par le formulaire de phishing.
- * Target = host:port du serveur (endpoint d'écoute). Les credentials sont
- * reçus en POST (login, password) et enregistrés dans le rapport ou en interne.
- */
 public class CredentialHarvester implements Module {
 
     private final List<String> harvested = new ArrayList<>();
@@ -46,25 +41,16 @@ public class CredentialHarvester implements Module {
         }
     }
 
-    /**
-     * Enregistre un couple login/password (appelé quand un formulaire est soumis).
-     */
     public void recordCredential(String login, String password) {
         if (login != null) {
             harvested.add(login + ":" + (password != null ? password : ""));
         }
     }
 
-    /**
-     * Retourne la liste des credentials récoltés (login:password).
-     */
     public List<String> getHarvested() {
         return new ArrayList<>(harvested);
     }
 
-    /**
-     * Vide la liste des credentials en mémoire.
-     */
     public void clearHarvested() {
         harvested.clear();
     }
