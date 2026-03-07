@@ -1,6 +1,8 @@
 #!/bin/bash
 # Lance l'app SANS Maven (javac + java).
-# Usage: ./run.sh   ou   ./run.sh list   ou   ./run.sh run agentstubgenerator 192.168.1.1 4444
+# Usage: ./run.sh        → CLI interactif
+#        ./run.sh gui     → Dashboard Bootstrap (http://127.0.0.1:7070)
+#        ./run.sh list    → liste les modules
 
 cd "$(dirname "$0")"
 SRC=src/main/java

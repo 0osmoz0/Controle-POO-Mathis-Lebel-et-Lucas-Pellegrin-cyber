@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RedTeam Tool</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #050508;
+      --surface: #0c0d12;
+      --surface-hover: #12141c;
+      --border: #1e2130;
+      --cyan: #00e5ff;
+      --cyan-dim: rgba(0, 229, 255, 0.6);
+      --green: #00ff88;
+      --green-dim: rgba(0, 255, 136, 0.5);
+      --orange: #ff9500;
+      --red: #ff3366;
+      --text: #e8eaef;
+      --muted: #6b7280;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* Grid background */
+    .grid-bg {
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .glow-orb {
+      position: fixed;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.15;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .glow-orb-1 { top: -200px; right: -100px; background: var(--cyan); }
+    .glow-orb-2 { bottom: -200px; left: -100px; background: var(--green); }
+
+    .main { position: relative; z-index: 1; }
+
+    /* Header */
+    .header {
+      padding: 2rem 0 3rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .logo {
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--text);
+    }
+    .logo span { color: var(--cyan); }
+    .tagline {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 0.5rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+
+    /* Cards */
+    .card-cyber {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      transition: all 0.25s ease;
+      overflow: hidden;
+    }
+    .card-cyber:hover {
+      border-color: var(--cyan-dim);
+      box-shadow: 0 0 30px rgba(0, 229, 255, 0.08);
+    }
+    .card-cyber .card-head {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .card-cyber .card-head .icon {
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      color: var(--cyan);
+    }
+    .card-cyber .card-head h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .card-cyber .card-body {
+      padding: 1.5rem;
+    }
+    .card-cyber .card-body .desc {
+      font-size: 0.875rem;
+      color: var(--muted);
+      margin-bottom: 1.25rem;
+    }
+
+    /* Forms */
+    .input-cyber {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.9rem;
+      background: var(--bg) !important;
+      border: 1px solid var(--border) !important;
+      color: var(--text) !important;
+      border-radius: 4px;
+      padding: 0.75rem 1rem;
+      transition: border-color 0.2s;
+    }
+    .input-cyber::placeholder { color: var(--muted); }
+    .input-cyber:focus {
+      border-color: var(--cyan) !important;
+      box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.15) !important;
+      outline: none;
+    }
+    label.cyber { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem; display: block; }
+
+    /* Buttons */
+    .btn-cyber {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      font-size: 0.875rem;
+      padding: 0.7rem 1.5rem;
+      background: transparent;
+      border: 1px solid var(--cyan);
+      color: var(--cyan);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-cyber:hover {
+      background: rgba(0, 229, 255, 0.1);
+      color: var(--cyan);
+      box-shadow: 0 0 20px rgba(0, 229, 255, 0.2);
+    }
+
+    /* Results */
+    .result-cyber {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.8rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1rem 1.25rem;
+      margin-top: 1rem;
+      min-height: 80px;
+    }
+    .result-cyber .line {
+      padding: 0.4rem 0;
+      border-bottom: 1px solid rgba(30, 33, 48, 0.5);
+    }
+    .result-cyber .line:last-child { border-bottom: none; }
+    .result-cyber .line.ok { color: var(--green); }
+    .result-cyber .line.warn { color: var(--orange); }
+    .result-cyber .line a { color: var(--cyan); text-decoration: none; }
+    .result-cyber .line a:hover { text-decoration: underline; }
+
+    /* Phishing row */
+    .phish-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      align-items: flex-end;
+      margin-bottom: 1rem;
+    }
+    .phish-field label { display: block; margin-bottom: 0.5rem; }
+    .phish-toggles { display: flex; gap: 1.5rem; align-items: center; }
+    .phish-toggles label { margin: 0; cursor: pointer; font-size: 0.875rem; color: var(--muted); display: flex; align-items: center; gap: 0.5rem; }
+
+    .form-check-input {
+      background: var(--bg);
+      border-color: var(--border);
+    }
+    .form-check-input:checked {
+      background-color: var(--cyan);
+      border-color: var(--cyan);
+    }
+
+    .loading::after { content: ''; animation: blink 1s step-end infinite; }
+    @keyframes blink { 50% { opacity: 0.3; } }
+  </style>
+</head>
+<body>
+  <div class="grid-bg"></div>
+  <div class="glow-orb glow-orb-1"></div>
+  <div class="glow-orb glow-orb-2"></div>
+
+  <div class="main container py-4">
+    <header class="header">
+      <div class="logo">Red<span>Team</span> Tool</div>
+      <div class="tagline">Offensive Security Platform</div>
+    </header>
+
+    <div class="row g-4 mt-2">
+      <div class="col-md-6">
+        <div class="card-cyber">
+          <div class="card-head">
+            <div class="icon"><i class="bi bi-key"></i></div>
+            <h3>HashCracker</h3>
+          </div>
+          <div class="card-body">
+            <p class="desc">Crack MD5/SHA1 par wordlist</p>
+            <label class="cyber">Hash ou fichier</label>
+            <input type="text" id="hashInput" class="form-control input-cyber mb-3" placeholder="5d41402abc4b2a76b9719d911017c592">
+            <button class="btn btn-cyber" onclick="runHashCracker()"><i class="bi bi-play-fill me-1"></i> Crack</button>
+            <div id="hashResult" class="result-cyber" style="display:none"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card-cyber">
+          <div class="card-head">
+            <div class="icon"><i class="bi bi-lock"></i></div>
+            <h3>Password Strength</h3>
+          </div>
+          <div class="card-body">
+            <p class="desc">Analyse force et vulnérabilités</p>
+            <label class="cyber">Mot de passe</label>
+            <input type="password" id="pwdInput" class="form-control input-cyber mb-3" placeholder="••••••••">
+            <button class="btn btn-cyber" onclick="runPasswordStrength()"><i class="bi bi-play-fill me-1"></i> Analyser</button>
+            <div id="pwdResult" class="result-cyber" style="display:none"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card-cyber">
+          <div class="card-head">
+            <div class="icon"><i class="bi bi-globe2"></i></div>
+            <h3>Subdomain Takeover</h3>
+          </div>
+          <div class="card-body">
+            <p class="desc">Détecte vulnérabilités takeover</p>
+            <label class="cyber">Domaine</label>
+            <input type="text" id="domainInput" class="form-control input-cyber mb-3" placeholder="example.com">
+            <button class="btn btn-cyber" onclick="runSubdomainTakeover()"><i class="bi bi-play-fill me-1"></i> Vérifier</button>
+            <div id="domainResult" class="result-cyber" style="display:none"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card-cyber">
+          <div class="card-head">
+            <div class="icon"><i class="bi bi-type"></i></div>
+            <h3>Homograph Generator</h3>
+          </div>
+          <div class="card-body">
+            <p class="desc">Domaines lookalike + Punycode</p>
+            <label class="cyber">Domaine cible</label>
+            <input type="text" id="homographInput" class="form-control input-cyber mb-3" placeholder="netflix.com">
+            <button class="btn btn-cyber" onclick="runHomograph()"><i class="bi bi-play-fill me-1"></i> Générer</button>
+            <div id="homographResult" class="result-cyber" style="display:none"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12">
+        <div class="card-cyber">
+          <div class="card-head">
+            <div class="icon"><i class="bi bi-bug"></i></div>
+            <h3>Phishing Assistant</h3>
+          </div>
+          <div class="card-body">
+            <p class="desc mb-4">Serveur phishing Netflix/Instagram + ngrok, QR, shortener, homograph</p>
+            <div class="phish-row">
+              <div class="phish-field">
+                <label class="cyber">Template</label>
+                <select id="phishTemplate" class="form-select input-cyber" style="width:140px">
+                  <option value="netflix">Netflix</option>
+                  <option value="instagram">Instagram</option>
+                </select>
+              </div>
+              <div class="phish-field">
+                <label class="cyber">Options</label>
+                <div class="phish-toggles">
+                  <label><input type="checkbox" class="form-check-input me-2" id="phishQr" checked> QR</label>
+                  <label><input type="checkbox" class="form-check-input me-2" id="phishShort"> Shortener</label>
+                  <label><input type="checkbox" class="form-check-input me-2" id="phishHom"> Homograph</label>
+                </div>
+              </div>
+              <div class="phish-field ms-auto">
+                <button class="btn btn-cyber px-4" onclick="startPhishing()"><i class="bi bi-play-fill me-1"></i> Lancer</button>
+              </div>
+            </div>
+            <div id="phishResult" class="result-cyber" style="display:none"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const API = '/api';
+    function show(id, html, err) {
+      const el = document.getElementById(id);
+      el.style.display = 'block';
+      el.innerHTML = html;
+      el.style.borderColor = err ? 'var(--red)' : '';
+    }
+    function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    async function post(path, body) {
+      const r = await fetch(API + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      return r.json();
+    }
+    function line(cls, t) { return '<div class="line ' + (cls||'') + '">' + t + '</div>'; }
+    async function runHashCracker() {
+      const v = document.getElementById('hashInput').value.trim();
+      if (!v) { show('hashResult', line('warn', 'Indiquez un hash ou fichier'), 1); return; }
+      show('hashResult', '<span class="loading" style="color:var(--muted)">Cracking</span>');
+      try {
+        const d = await post('/hashcracker', { input: v });
+        const html = (d.findings || []).map(f => {
+          const m = esc(f).replace(/\[.*?\]\s*/g, '');
+          const c = m.includes('CRACKED') ? 'ok' : m.includes('Non trouvé') ? 'warn' : '';
+          return line(c, m);
+        }).join('') || line('', 'Aucun résultat');
+        show('hashResult', html);
+      } catch (e) { show('hashResult', line('warn', 'Erreur: ' + esc(e.message)), 1); }
+    }
+    async function runPasswordStrength() {
+      const v = document.getElementById('pwdInput').value;
+      if (!v) { show('pwdResult', line('warn', 'Indiquez un mot de passe'), 1); return; }
+      show('pwdResult', '<span class="loading" style="color:var(--muted)">Analyse</span>');
+      try {
+        const d = await post('/strength', { password: v });
+        show('pwdResult', (d.findings || []).map(f => line('', esc(f).replace(/\[.*?\]\s*/g, ''))).join(''));
+      } catch (e) { show('pwdResult', line('warn', 'Erreur: ' + esc(e.message)), 1); }
+    }
+    async function runSubdomainTakeover() {
+      const v = document.getElementById('domainInput').value.trim();
+      if (!v) { show('domainResult', line('warn', 'Indiquez un domaine'), 1); return; }
+      show('domainResult', '<span class="loading" style="color:var(--muted)">Vérification</span>');
+      try {
+        const d = await post('/subdomain', { domain: v });
+        const html = (d.findings || []).map(f => {
+          const m = esc(f).replace(/\[.*?\]\s*/g, '');
+          return line(m.includes('TAKEOVER') ? 'ok' : '', m);
+        }).join('');
+        show('domainResult', html);
+      } catch (e) { show('domainResult', line('warn', 'Erreur: ' + esc(e.message)), 1); }
+    }
+    async function runHomograph() {
+      const v = document.getElementById('homographInput').value.trim() || 'netflix.com';
+      show('homographResult', '<span class="loading" style="color:var(--muted)">Génération</span>');
+      try {
+        const d = await post('/homograph', { domain: v });
+        let html = d.filePath ? line('ok', 'Fichier: ' + esc(d.filePath)) : '';
+        (d.findings || []).forEach(f => { html += line('', esc(f).replace(/\[.*?\]\s*/g, '')); });
+        show('homographResult', html);
+      } catch (e) { show('homographResult', line('warn', 'Erreur: ' + esc(e.message)), 1); }
+    }
+    async function startPhishing() {
+      show('phishResult', '<span class="loading" style="color:var(--muted)">Démarrage</span>');
+      try {
+        const d = await post('/phishing/start', {
+          template: document.getElementById('phishTemplate').value,
+          qr: document.getElementById('phishQr').checked,
+          shortener: document.getElementById('phishShort').checked,
+          homograph: document.getElementById('phishHom').checked
+        });
+        let html = line('ok', '✓ Phishing actif');
+        if (d.url) html += line('', 'URL: <a href="' + esc(d.url) + '" target="_blank">' + esc(d.url) + '</a>');
+        if (d.shortener) html += line('', 'Shortener: ' + esc(d.shortener));
+        if (d.qrFile) html += line('', 'QR: ' + esc(d.qrFile));
+        if (d.homographFile) html += line('', 'Homograph: ' + esc(d.homographFile));
+        show('phishResult', html);
+      } catch (e) { show('phishResult', line('warn', 'Erreur: ' + esc(e.message)), 1); }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+# Domaines homographes pour netflix
+# Punycode = format pour enregistrement
+
+nеtflix | xn--ntflix-3of
+netfliх | xn--netfli-gsf
+netflіx | xn--netflx-tvf
+nеtfliх | xn--ntfli-zwe0j
+nеtflіx | xn--ntflx-zwe8u
+netflіх | xn--netfl-uze2j
