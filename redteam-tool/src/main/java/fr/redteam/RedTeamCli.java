@@ -12,6 +12,7 @@ import fr.redteam.output.ConsoleReporter;
 import fr.redteam.output.Reporter;
 import fr.redteam.payload.ApkPayloadBuilder;
 import fr.redteam.payload.DownloadServer;
+import fr.redteam.util.Ansi;
 import fr.redteam.web.CredentialHarvester;
 import fr.redteam.web.DirectoryBruteforcer;
 import fr.redteam.web.PhishingHttpServer;
@@ -26,13 +27,27 @@ import java.util.Scanner;
 public class RedTeamCli {
 
     private static final String LOGO =
-            "  ____            ______          __  __   \n" +
-            " |  _ \\ ___  __ _| ___ \\ \\        / /_| |_  \n" +
-            " | |_) / _ \\/ _` | |_ \\ \\  /\\  / / __| __| \n" +
-            " |  _ <  __/ (_| |  _| \\ \\/  \\/ /| |_| |_  \n" +
-            " |_| \\_\\___|\\__, |_|    \\__/\\__/  \\__|\\__| \n" +
-            "            |___/                          \n" +
-            "  RedTeam Tool - Offensive Security (PoC)  \n";
+            "\n" +
+            "RRRRRRRRRRRRRRRRR   EEEEEEEEEEEEEEEEEEEEEEDDDDDDDDDDDDD       TTTTTTTTTTTTTTTTTTTTTTT     OOOOOOOOO          OOOOOOOOO     LLLLLLLLLLL             \n" +
+            "R::::::::::::::::R  E::::::::::::::::::::ED::::::::::::DDD    T:::::::::::::::::::::T   OO:::::::::OO      OO:::::::::OO   L:::::::::L             \n" +
+            "R::::::RRRRRR:::::R E::::::::::::::::::::ED:::::::::::::::DD  T:::::::::::::::::::::T OO:::::::::::::OO  OO:::::::::::::OO L:::::::::L             \n" +
+            "RR:::::R     R:::::REE::::::EEEEEEEEE::::EDDD:::::DDDDD:::::D T:::::TT:::::::TT:::::TO:::::::OOO:::::::OO:::::::OOO:::::::OLL:::::::LL             \n" +
+            "  R::::R     R:::::R  E:::::E       EEEEEE  D:::::D    D:::::DTTTTTT  T:::::T  TTTTTTO::::::O   O::::::OO::::::O   O::::::O  L:::::L               \n" +
+            "  R::::R     R:::::R  E:::::E               D:::::D     D:::::D       T:::::T        O:::::O     O:::::OO:::::O     O:::::O  L:::::L               \n" +
+            "  R::::RRRRRR:::::R   E::::::EEEEEEEEEE     D:::::D     D:::::D       T:::::T        O:::::O     O:::::OO:::::O     O:::::O  L:::::L               \n" +
+            "  R:::::::::::::RR    E:::::::::::::::E     D:::::D     D:::::D       T:::::T        O:::::O     O:::::OO:::::O     O:::::O  L:::::L               \n" +
+            "  R::::RRRRRR:::::R   E:::::::::::::::E     D:::::D     D:::::D       T:::::T        O:::::O     O:::::OO:::::O     O:::::O  L:::::L               \n" +
+            "  R::::R     R:::::R  E::::::EEEEEEEEEE     D:::::D     D:::::D       T:::::T        O:::::O     O:::::OO:::::O     O:::::O  L:::::L               \n" +
+            "  R::::R     R:::::R  E:::::E               D:::::D     D:::::D       T:::::T        O:::::O     O:::::OO:::::O     O:::::O  L:::::L               \n" +
+            "  R::::R     R:::::R  E:::::E       EEEEEE  D:::::D    D:::::D        T:::::T        O::::::O   O::::::OO::::::O   O::::::O  L:::::L         LLLLLL\n" +
+            "RR:::::R     R:::::REE::::::EEEEEEEE:::::EDDD:::::DDDDD:::::D       TT:::::::TT      O:::::::OOO:::::::OO:::::::OOO:::::::OLL:::::::LLLLLLLLL:::::L\n" +
+            "R::::::R     R:::::RE::::::::::::::::::::ED:::::::::::::::DD        T:::::::::T       OO:::::::::::::OO  OO:::::::::::::OO L::::::::::::::::::::::L\n" +
+            "R::::::R     R:::::RE::::::::::::::::::::ED::::::::::::DDD          T:::::::::T         OO:::::::::OO      OO:::::::::OO   L::::::::::::::::::::::L\n" +
+            "RRRRRRRR     RRRRRRREEEEEEEEEEEEEEEEEEEEEEDDDDDDDDDDDDD             TTTTTTTTTTT           OOOOOOOOO          OOOOOOOOO     LLLLLLLLLLLLLLLLLLLLLLLL\n" +
+            "\n";
+
+    private static final String SEP = "══════════════════════════════════════════════════════";
+    private static final String SEP_THIN = "──────────────────────────────────────────────────────────";
 
     private final Map<String, Module> modules = new LinkedHashMap<>();
     private final Reporter reporter = new ConsoleReporter();
@@ -54,7 +69,9 @@ public class RedTeamCli {
     }
 
     public void printLogo() {
-        System.out.println(LOGO);
+        System.out.println(Ansi.RED + LOGO + Ansi.RESET);
+        System.out.println(Ansi.BOLD + Ansi.CYAN + "  Offensive Security (PoC)" + Ansi.RESET);
+        System.out.println();
     }
 
     public void run(String[] args) {
@@ -74,10 +91,11 @@ public class RedTeamCli {
     }
 
     private void listModules() {
-        System.out.println("Modules disponibles:");
-        System.out.println("--------------------");
+        System.out.println(Ansi.CYAN + "\n  " + SEP_THIN + Ansi.RESET);
+        System.out.println(Ansi.bold("  Modules disponibles"));
+        System.out.println(Ansi.CYAN + "  " + SEP_THIN + Ansi.RESET);
         for (Module m : modules.values()) {
-            System.out.println("  " + m.getName() + " - " + m.getDescription());
+            System.out.println("  " + Ansi.green(m.getName()) + Ansi.dim(" - " + m.getDescription()));
         }
     }
 
@@ -96,63 +114,63 @@ public class RedTeamCli {
         Target target = new Target(host, port > 0 ? port : -1);
         Report report = new DefaultReport();
         m.run(target, report);
-        System.out.println("\n--- Rapport " + m.getName() + " ---");
+        System.out.println(Ansi.CYAN + "\n  " + SEP_THIN + Ansi.RESET);
+        System.out.println(Ansi.bold("  Rapport " + m.getName()));
+        System.out.println(Ansi.CYAN + "  " + SEP_THIN + Ansi.RESET);
         reporter.output(report);
     }
 
     private void runInteractive() {
         try (Scanner scan = new Scanner(System.in)) {
             while (true) {
-                System.out.println("\n  [1] Lister les modules");
-                System.out.println("  [2] Exécuter un module");
-                System.out.println("  [3] Démarrer serveur phishing (HTTP sur 127.0.0.1:8080)");
-                System.out.println("  [q] Quitter");
-                System.out.print("Choix: ");
+                System.out.println(Ansi.CYAN + "\n  " + SEP + Ansi.RESET);
+                System.out.println(Ansi.bold("  MENU PRINCIPAL"));
+                System.out.println(Ansi.CYAN + "  " + SEP_THIN + Ansi.RESET);
+                System.out.println("  " + Ansi.green("[1]") + " Démarrer serveur phishing " + Ansi.dim("(HTTP 127.0.0.1:8080)"));
+                System.out.println("  " + Ansi.green("[2]") + " HashCracker " + Ansi.dim("(crack MD5/SHA1 par wordlist)"));
+                System.out.println(Ansi.CYAN + "  " + SEP_THIN + Ansi.RESET);
+                System.out.print("  " + Ansi.bold("Choix") + " › ");
                 String line = scan.nextLine();
                 if (line == null) break;
                 line = line.trim();
-                if ("q".equalsIgnoreCase(line) || "quit".equalsIgnoreCase(line)) break;
                 if ("1".equals(line)) {
-                    listModules();
-                    continue;
-                }
-                if ("3".equals(line)) {
                     startPhishingServer(scan);
                     continue;
                 }
                 if ("2".equals(line)) {
-                    System.out.print("Nom du module: ");
-                    String name = scan.nextLine();
-                    if (name != null) name = name.trim();
-                    String host;
-                    int port;
-                    if ("hashcracker".equalsIgnoreCase(name)) {
-                        System.out.print("Hash MD5/SHA1 ou chemin fichier de hashes: ");
-                        String h = scan.nextLine();
-                        host = (h != null && !h.trim().isEmpty()) ? h.trim() : "";
-                        port = -1;
-                    } else {
-                        System.out.print("Host (défaut 127.0.0.1): ");
-                        String hostLine = scan.nextLine();
-                        host = (hostLine != null && !hostLine.trim().isEmpty()) ? hostLine.trim() : "127.0.0.1";
-                        System.out.print("Port (défaut -1): ");
-                        String portLine = scan.nextLine();
-                        port = parseInt(portLine != null ? portLine.trim() : "", -1);
-                    }
-                    runModule(name, host, port);
+                    runHashCracker(scan);
                     continue;
                 }
-                System.out.println("Choix invalide.");
+                System.out.println(Ansi.red("  ✗ Choix invalide."));
             }
         }
-        System.out.println("Bye.");
+    }
+
+    private void runHashCracker(Scanner scan) {
+        System.out.println(Ansi.CYAN + "\n  " + SEP_THIN + Ansi.RESET);
+        System.out.println(Ansi.bold("  HashCracker"));
+        System.out.println(Ansi.CYAN + "  " + SEP_THIN + Ansi.RESET);
+        System.out.print("  Hash MD5/SHA1 ou chemin fichier › ");
+        String input = scan.nextLine();
+        String hashOrPath = (input != null && !input.trim().isEmpty()) ? input.trim() : "";
+        Target target = new Target(hashOrPath, -1);
+        Report report = new DefaultReport();
+        Module hashCracker = modules.get("hashcracker");
+        hashCracker.run(target, report);
+        System.out.println(Ansi.CYAN + "\n  " + SEP_THIN + Ansi.RESET);
+        System.out.println(Ansi.bold("  Rapport HashCracker"));
+        System.out.println(Ansi.CYAN + "  " + SEP_THIN + Ansi.RESET);
+        reporter.output(report);
     }
 
     private void startPhishingServer(Scanner scan) {
-        System.out.println("\nChoisissez le template de connexion :");
-        System.out.println("  [1] Netflix");
-        System.out.println("  [2] Instagram");
-        System.out.print("Choix (1-2): ");
+        System.out.println(Ansi.CYAN + "\n  " + SEP_THIN + Ansi.RESET);
+        System.out.println(Ansi.bold("  Serveur Phishing"));
+        System.out.println(Ansi.CYAN + "  " + SEP_THIN + Ansi.RESET);
+        System.out.println("  Choisissez le template :");
+        System.out.println("  " + Ansi.green("[1]") + " Netflix");
+        System.out.println("  " + Ansi.green("[2]") + " Instagram");
+        System.out.print("  Choix › ");
         String choice = scan.nextLine();
         if (choice != null) choice = choice.trim();
         String[] names = PhishingPageGenerator.TEMPLATE_NAMES;
@@ -166,17 +184,17 @@ public class RedTeamCli {
         try {
             PhishingHttpServer srv = new PhishingHttpServer(host, port, new PhishingPageGenerator(), new CredentialHarvester(), template);
             srv.start();
-            System.out.println("\n>>> Serveur phishing démarré sur http://" + host + ":" + port);
-            if (template != null) {
-                System.out.println(">>> Template: " + template + " (page de connexion réaliste)");
-            } else {
-                System.out.println(">>> Ouvrez l'URL pour choisir un template.");
-            }
-            System.out.println(">>> Les identifiants soumis s'afficheront ici.");
-            System.out.println(">>> Appuyez sur [Entrée] pour revenir au menu.");
+            System.out.println(Ansi.GREEN + "\n  " + SEP + Ansi.RESET);
+            System.out.println(Ansi.bold("  ✓ Serveur démarré"));
+            System.out.println(Ansi.GREEN + "  " + SEP_THIN + Ansi.RESET);
+            System.out.println("  " + Ansi.cyan("URL") + "  › " + Ansi.bold("http://" + host + ":" + port));
+            System.out.println("  " + Ansi.cyan("Template") + " › " + (template != null ? Ansi.green(template) : Ansi.yellow("choix via URL")));
+            System.out.println(Ansi.dim("  Les identifiants s'afficheront ici."));
+            System.out.println(Ansi.CYAN + "  " + SEP_THIN + Ansi.RESET);
+            System.out.print(Ansi.dim("  [Entrée] pour revenir au menu › "));
             scan.nextLine();
         } catch (Exception e) {
-            System.out.println("Erreur: " + e.getMessage());
+            System.out.println(Ansi.red("  ✗ Erreur: " + e.getMessage()));
         }
     }
 

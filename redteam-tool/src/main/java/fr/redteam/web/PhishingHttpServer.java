@@ -1,5 +1,6 @@
 package fr.redteam.web;
 
+import fr.redteam.util.Ansi;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 
@@ -105,7 +106,7 @@ public class PhishingHttpServer {
         }
         if (login != null) {
             harvester.recordCredential(login, password);
-            System.out.println("[Harvest] " + login + ":" + (password != null ? password : ""));
+            System.out.println(Ansi.GREEN + "  ✓ [Harvest] " + Ansi.RESET + Ansi.cyan(login) + Ansi.dim(":") + " " + (password != null ? password : ""));
         }
         String redirectUrl = getRedirectUrl(ex.getRequestURI().getQuery());
         ex.getResponseHeaders().add("Location", redirectUrl);
