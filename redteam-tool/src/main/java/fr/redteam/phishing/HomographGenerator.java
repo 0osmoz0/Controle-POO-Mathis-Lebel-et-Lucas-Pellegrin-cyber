@@ -4,7 +4,11 @@ import fr.redteam.core.Module;
 import fr.redteam.core.Report;
 import fr.redteam.core.Target;
 
+import java.io.IOException;
 import java.net.IDN;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -12,7 +16,7 @@ import java.util.Set;
 
 /**
  * Génère des domaines homographes (caractères Unicode ressemblant à des lettres ASCII).
- * Inclut le Punycode (xn--...) pour enregistrement et utilisation réelle.
+ * Génère un fichier avec toutes les variantes + Punycode pour enregistrement.
  */
 public class HomographGenerator implements Module {
 
@@ -26,7 +30,7 @@ public class HomographGenerator implements Module {
         {"x", "х"},  // Cyrillic х
         {"y", "у"},  // Cyrillic у
         {"i", "і"},  // Cyrillic і
-        {"o", "ο"},  // Greek omicron (2e entrée pour variantes)
+        {"o", "ο"},  // Greek omicron
     };
 
     @Override
@@ -36,7 +40,7 @@ public class HomographGenerator implements Module {
 
     @Override
     public String getDescription() {
-        return "Génère des domaines homographes (lookalike Unicode) avec Punycode";
+        return "Génère des domaines homographes (lookalike Unicode) avec fichier Punycode";
     }
 
     @Override
@@ -52,21 +56,51 @@ public class HomographGenerator implements Module {
         List<String> list = new ArrayList<>(variants);
         list.remove(domain);
 
-        report.addFinding("HomographGenerator", "Domaine cible: " + domain);
-        report.addFinding("HomographGenerator", "Variants homographes: " + list.size());
-        report.addFinding("HomographGenerator", "Utilisez le Punycode (xn--...) pour enregistrer le domaine.");
-        report.addFinding("HomographGenerator", "");
+        String safeName = domain.replace(".", "_");
+        String outPath = "homograph_" + safeName + ".txt";
+        Path file = Paths.get(outPath).toAbsolutePath();
 
-        int shown = 0;
+        StringBuilder content = new StringBuilder();
+        content.append("# Domaines homographes pour ").append(domain).append("\n");
+        content.append("# Utilisez le Punycode pour enregistrer le domaine chez un registrar\n");
+        content.append("# Format: variante | Punycode | URL\n\n");
+
         for (String v : list) {
-            if (shown >= 10) break;
             String punycode = toPunycode(v);
-            report.addFinding("HomographGenerator", "  → " + v);
-            report.addFinding("HomographGenerator", "    Punycode: " + punycode);
-            shown++;
+            content.append(v).append(" | ").append(punycode).append(" | https://").append(punycode).append("\n");
         }
-        if (list.size() > 10) {
-            report.addFinding("HomographGenerator", "  ... et " + (list.size() - 10) + " autres");
+
+        try {
+            Files.writeString(file, content.toString());
+            report.addFinding("HomographGenerator", "Fichier généré: " + file);
+            report.addFinding("HomographGenerator", "Variants: " + list.size() + " (voir le fichier pour Punycode)");
+        } catch (IOException e) {
+            report.addFinding("HomographGenerator", "Erreur fichier: " + e.getMessage());
+        }
+    }
+
+    /** Retourne le chemin du fichier généré, ou null. Utilisé par l'assistant phishing. */
+    public static String runAndGetFilePath(String domain) {
+        if (domain == null || domain.trim().isEmpty()) return null;
+        domain = domain.trim().toLowerCase().replaceAll("^https?://", "").replaceAll("/.*", "");
+        Set<String> variants = new HomographGenerator().generateHomographs(domain);
+        List<String> list = new ArrayList<>(variants);
+        list.remove(domain);
+        if (list.isEmpty()) return null;
+
+        String safeName = domain.replace(".", "_");
+        Path file = Paths.get("homograph_" + safeName + ".txt").toAbsolutePath();
+        StringBuilder content = new StringBuilder();
+        content.append("# Domaines homographes pour ").append(domain).append("\n");
+        content.append("# Punycode = format pour enregistrement\n\n");
+        for (String v : list) {
+            content.append(v).append(" | ").append(toPunycode(v)).append("\n");
+        }
+        try {
+            Files.writeString(file, content.toString());
+            return file.toString();
+        } catch (IOException e) {
+            return null;
         }
     }
 
