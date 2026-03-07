@@ -1,5 +1,11 @@
 package fr.redteam.phishing;
 
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.EncodeHintType;
+import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import fr.redteam.core.Module;
 import fr.redteam.core.Report;
 import fr.redteam.core.Target;
@@ -10,9 +16,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
 
 /**
- * Génère un QR code pointant vers une URL (via API publique, pas de dépendance).
+ * Génère un QR code pointant vers une URL (ZXing + API publique pour HTML).
  */
 public class QrCodeGenerator implements Module {
 
@@ -64,5 +71,42 @@ public class QrCodeGenerator implements Module {
     private static String escapeHtml(String s) {
         if (s == null) return "";
         return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;");
+    }
+
+    /**
+     * Génère un QR code et le retourne en ASCII/Unicode pour affichage dans le terminal.
+     * @param url URL à encoder
+     * @return chaîne multiligne représentant le QR (blocs Unicode █ et espace), ou null en cas d'erreur
+     */
+    public static String toAsciiArt(String url) {
+        if (url == null || url.trim().isEmpty()) return null;
+        url = url.trim();
+        if (!url.startsWith("http://") && !url.startsWith("https://")) url = "http://" + url;
+        try {
+            QRCodeWriter writer = new QRCodeWriter();
+            Map<EncodeHintType, Object> hints = Map.of(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
+            BitMatrix matrix = writer.encode(url, BarcodeFormat.QR_CODE, 80, 80, hints);
+            int width = matrix.getWidth();
+            int height = matrix.getHeight();
+            // Réduire pour le terminal (~20-25 caractères de large)
+            int block = Math.max(2, Math.min(width, height) / 20);
+            StringBuilder sb = new StringBuilder();
+            for (int y = 0; y < height; y += block) {
+                for (int x = 0; x < width; x += block) {
+                    boolean black = false;
+                    for (int dy = 0; dy < block && y + dy < height; dy++) {
+                        for (int dx = 0; dx < block && x + dx < width; dx++) {
+                            if (matrix.get(x + dx, y + dy)) { black = true; break; }
+                        }
+                        if (black) break;
+                    }
+                    sb.append(black ? "██" : "  ");
+                }
+                sb.append("\n");
+            }
+            return sb.toString();
+        } catch (WriterException e) {
+            return null;
+        }
     }
 }

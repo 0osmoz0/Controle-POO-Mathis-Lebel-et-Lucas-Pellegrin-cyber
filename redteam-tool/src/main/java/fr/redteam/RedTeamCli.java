@@ -260,7 +260,7 @@ public class RedTeamCli {
                 modules.get("homographgenerator").run(homTarget, homReport);
                 for (String f : homReport.getFindings()) {
                     if (f.contains("  → ")) {
-                        String msg = f.replaceAll("\\[HomographGenerator\\]\\s*", "").replaceFirst("^\\s*→\\s*", "").trim();
+                        String msg = f.replaceAll("\\[HomographGenerator\\]\\s*", "").replaceFirst(".*→\\s*", "").trim();
                         homographVariants.add(msg);
                     }
                 }
@@ -275,8 +275,17 @@ public class RedTeamCli {
             if (wantShortener) {
                 System.out.println("  " + Ansi.cyan("Shortener") + " › " + Ansi.bold(finalUrl));
             }
-            if (wantQr && qrFilePath != null) {
-                System.out.println("  " + Ansi.cyan("QR") + "       › " + Ansi.bold(qrFilePath));
+            if (wantQr) {
+                String qrArt = QrCodeGenerator.toAsciiArt(publicUrl);
+                if (qrArt != null) {
+                    System.out.println("  " + Ansi.cyan("QR Code") + " (scannez avec votre téléphone) :");
+                    for (String line : qrArt.split("\n")) {
+                        System.out.println("  " + line);
+                    }
+                }
+                if (qrFilePath != null) {
+                    System.out.println("  " + Ansi.cyan("Fichier") + "   › " + Ansi.bold(qrFilePath));
+                }
             }
             if (wantHomograph && !homographVariants.isEmpty()) {
                 System.out.println("  " + Ansi.cyan("Homograph") + " › " + domainForHomograph + Ansi.dim(" (") + homographVariants.size() + Ansi.dim(" variantes)"));
