@@ -4,20 +4,18 @@ import fr.redteam.core.DefaultReport;
 import fr.redteam.core.Module;
 import fr.redteam.core.Report;
 import fr.redteam.core.Target;
-import fr.redteam.c2.AgentStubGenerator;
-import fr.redteam.c2.Listener;
 import fr.redteam.credential.HashCracker;
-import fr.redteam.credential.PasswordSprayer;
+import fr.redteam.credential.PasswordStrengthAnalyzer;
 import fr.redteam.output.ConsoleReporter;
 import fr.redteam.output.Reporter;
-import fr.redteam.payload.ApkPayloadBuilder;
-import fr.redteam.payload.DownloadServer;
+import fr.redteam.phishing.HomographGenerator;
+import fr.redteam.phishing.QrCodeGenerator;
+import fr.redteam.recon.SubdomainTakeoverChecker;
 import fr.redteam.util.Ansi;
 import fr.redteam.web.CredentialHarvester;
-import fr.redteam.web.DirectoryBruteforcer;
 import fr.redteam.web.PhishingHttpServer;
 import fr.redteam.web.PhishingPageGenerator;
-import fr.redteam.web.PhishingServer;
+import fr.redteam.web.UrlShortener;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -53,15 +51,13 @@ public class RedTeamCli {
     private final Reporter reporter = new ConsoleReporter();
 
     public RedTeamCli() {
-        register(new Listener());
-        register(new AgentStubGenerator());
         register(new HashCracker());
-        register(new PasswordSprayer());
-        register(new ApkPayloadBuilder());
-        register(new DownloadServer());
-        register(new PhishingServer());
         register(new CredentialHarvester());
-        register(new DirectoryBruteforcer());
+        register(new QrCodeGenerator());
+        register(new SubdomainTakeoverChecker());
+        register(new UrlShortener());
+        register(new PasswordStrengthAnalyzer());
+        register(new HomographGenerator());
     }
 
     private void register(Module m) {
@@ -128,19 +124,23 @@ public class RedTeamCli {
                 System.out.println(Ansi.CYAN + "  " + SEP_THIN + Ansi.RESET);
                 System.out.println("  " + Ansi.green("[1]") + " Démarrer serveur phishing " + Ansi.dim("(HTTP 127.0.0.1:8080)"));
                 System.out.println("  " + Ansi.green("[2]") + " HashCracker " + Ansi.dim("(crack MD5/SHA1 par wordlist)"));
+                System.out.println("  " + Ansi.green("[3]") + " QR Code Generator " + Ansi.dim("(génère QR vers URL)"));
+                System.out.println("  " + Ansi.green("[4]") + " Subdomain Takeover " + Ansi.dim("(détecte vulnérabilités)"));
+                System.out.println("  " + Ansi.green("[5]") + " URL Shortener " + Ansi.dim("(tracking des clics)"));
+                System.out.println("  " + Ansi.green("[6]") + " Password Strength " + Ansi.dim("(analyse force)"));
+                System.out.println("  " + Ansi.green("[7]") + " Homograph Generator " + Ansi.dim("(domaines lookalike)"));
                 System.out.println(Ansi.CYAN + "  " + SEP_THIN + Ansi.RESET);
                 System.out.print("  " + Ansi.bold("Choix") + " › ");
                 String line = scan.nextLine();
                 if (line == null) break;
                 line = line.trim();
-                if ("1".equals(line)) {
-                    startPhishingServer(scan);
-                    continue;
-                }
-                if ("2".equals(line)) {
-                    runHashCracker(scan);
-                    continue;
-                }
+                if ("1".equals(line)) { startPhishingServer(scan); continue; }
+                if ("2".equals(line)) { runHashCracker(scan); continue; }
+                if ("3".equals(line)) { runQrCodeGenerator(scan); continue; }
+                if ("4".equals(line)) { runSubdomainTakeover(scan); continue; }
+                if ("5".equals(line)) { startUrlShortener(scan); continue; }
+                if ("6".equals(line)) { runPasswordStrength(scan); continue; }
+                if ("7".equals(line)) { runHomographGenerator(scan); continue; }
                 System.out.println(Ansi.red("  ✗ Choix invalide."));
             }
         }
