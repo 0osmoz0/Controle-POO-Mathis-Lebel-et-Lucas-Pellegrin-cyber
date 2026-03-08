@@ -1,20 +1,17 @@
 # Wordlists
 
-**HashCracker** utilise **rockyou** pour cracker les hashes MD5/SHA-1 (CLI et GUI).
+**HashCracker** utilise **uniquement rockyou.txt** (~14 millions de mots) pour cracker les hashes MD5/SHA-1 (CLI et GUI).
 
-## Fichiers
+## rockyou.txt
 
-| Fichier | Usage |
-|---------|--------|
-| **rockyou-subset.txt** | Inclus dans le projet (~200 mots courants). Utilisé par défaut. |
-| **rockyou.txt** | Wordlist complète (~14 Mo). HashCracker la charge en priorité si présente. |
+Le fichier est inclus dans `src/main/resources/wordlists/rockyou.txt` (décompressé).
 
-## Ordre de chargement
+### Emplacements détectés automatiquement
 
-1. `rockyou.txt` (resources ou `src/main/resources/wordlists/` ou `wordlists/`)
-2. `rockyou-subset.txt` (inclus, fallback)
+1. `src/main/resources/wordlists/rockyou.txt` (resources / classpath)
+2. `wordlists/rockyou.txt`
+3. `/usr/share/wordlists/rockyou.txt` (Kali Linux)
 
-## Utilisation
+### Si rockyou.txt est absent
 
-- **Par défaut** : `rockyou-subset.txt` est utilisé (fourni dans le projet).
-- **Pour plus de mots** : placez `rockyou.txt` dans `src/main/resources/wordlists/`. Téléchargez-le depuis [hashes.org](https://hashes.org/leaks.php) ou [GitHub rockyou](https://github.com/brannondorsey/naive-hashcat/releases).
+Téléchargez-le depuis [kali-wordlists](https://github.com/00xBAD/kali-wordlists) ou [SecLists](https://github.com/danielmiessler/SecLists), décompressez `rockyou.txt.gz` avec `gunzip -k rockyou.txt.gz`, puis placez-le dans `src/main/resources/wordlists/`.

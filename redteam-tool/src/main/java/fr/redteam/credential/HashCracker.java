@@ -18,7 +18,6 @@ import java.util.List;
 public class HashCracker implements Module {
 
     private static final String ROCKYOU_RESOURCE = "/wordlists/rockyou.txt";
-    private static final String ROCKYOU_SUBSET = "/wordlists/rockyou-subset.txt";
 
     @Override
     public String getName() {
@@ -89,19 +88,11 @@ public class HashCracker implements Module {
     }
 
     private List<String> loadWordlist() {
-        // 1. rockyou.txt depuis les resources (classpath)
+        // rockyou.txt uniquement (resources ou fichiers)
         List<String> words = loadWordlistFromResource(ROCKYOU_RESOURCE);
-        // 2. rockyou.txt depuis le système de fichiers
-        if (words.isEmpty()) {
-            words = loadWordlistFromFile("src/main/resources/wordlists/rockyou.txt");
-        }
-        if (words.isEmpty()) {
-            words = loadWordlistFromFile("wordlists/rockyou.txt");
-        }
-        // 3. rockyou-subset.txt (inclus dans le projet)
-        if (words.isEmpty()) {
-            words = loadWordlistFromResource(ROCKYOU_SUBSET);
-        }
+        if (words.isEmpty()) words = loadWordlistFromFile("src/main/resources/wordlists/rockyou.txt");
+        if (words.isEmpty()) words = loadWordlistFromFile("wordlists/rockyou.txt");
+        if (words.isEmpty()) words = loadWordlistFromFile("/usr/share/wordlists/rockyou.txt");
         return words;
     }
 
