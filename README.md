@@ -26,8 +26,8 @@ Projet réalisé par **Mathis Lebel** et **Lucas Pellegrin** dans le cadre du co
    java -version   # doit afficher 17+
    ```
 
-3. *(Optionnel)* **Wordlists pour HashCracker**  
-   Placez `rockyou.txt` ou `passwords.txt` dans `src/main/resources/wordlists/` pour le crack de hashes. Voir `redteam-tool/src/main/resources/wordlists/README-wordlists.md`.
+3. *(Optionnel)* **Wordlist rockyou pour HashCracker**  
+   Un subset (`rockyou-subset.txt`) est inclus. Pour la liste complète, placez `rockyou.txt` dans `src/main/resources/wordlists/`. Voir `redteam-tool/src/main/resources/wordlists/README-wordlists.md`.
 
 ---
 

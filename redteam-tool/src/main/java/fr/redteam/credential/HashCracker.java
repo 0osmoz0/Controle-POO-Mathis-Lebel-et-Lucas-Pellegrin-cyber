@@ -17,8 +17,8 @@ import java.util.List;
 
 public class HashCracker implements Module {
 
-    private static final String WORDLIST_PATH = "/wordlists/passwords.txt";
-    private static final String ROCKYOU_PATH = "/wordlists/rockyou.txt";
+    private static final String ROCKYOU_RESOURCE = "/wordlists/rockyou.txt";
+    private static final String ROCKYOU_SUBSET = "/wordlists/rockyou-subset.txt";
 
     @Override
     public String getName() {
@@ -50,11 +50,11 @@ public class HashCracker implements Module {
 
         List<String> wordlist = loadWordlist();
         if (wordlist.isEmpty()) {
-            report.addFinding("HashCracker", "Wordlist vide. Placez rockyou.txt ou passwords.txt dans src/main/resources/wordlists/");
+            report.addFinding("HashCracker", "Wordlist rockyou introuvable. Placez rockyou.txt dans src/main/resources/wordlists/ ou à la racine du projet.");
             return;
         }
 
-        report.addFinding("HashCracker", "Cracking " + hashes.size() + " hash(es) avec " + wordlist.size() + " mots...");
+        report.addFinding("HashCracker", "Cracking " + hashes.size() + " hash(es) avec rockyou (" + wordlist.size() + " mots)...");
 
         for (String hash : hashes) {
             String trimmed = hash.trim().toLowerCase();
@@ -89,20 +89,44 @@ public class HashCracker implements Module {
     }
 
     private List<String> loadWordlist() {
-        List<String> words = loadWordlistFromPath(ROCKYOU_PATH);
+        // 1. rockyou.txt depuis les resources (classpath)
+        List<String> words = loadWordlistFromResource(ROCKYOU_RESOURCE);
+        // 2. rockyou.txt depuis le système de fichiers
         if (words.isEmpty()) {
-            words = loadWordlistFromPath(WORDLIST_PATH);
+            words = loadWordlistFromFile("src/main/resources/wordlists/rockyou.txt");
+        }
+        if (words.isEmpty()) {
+            words = loadWordlistFromFile("wordlists/rockyou.txt");
+        }
+        // 3. rockyou-subset.txt (inclus dans le projet)
+        if (words.isEmpty()) {
+            words = loadWordlistFromResource(ROCKYOU_SUBSET);
         }
         return words;
     }
 
-    private List<String> loadWordlistFromPath(String resourcePath) {
+    private List<String> loadWordlistFromResource(String resourcePath) {
         List<String> words = new ArrayList<>();
         try (InputStream is = getClass().getResourceAsStream(resourcePath)) {
             if (is == null) return words;
             try (BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
                 String line;
                 while ((line = br.readLine()) != null) {
+                    if (!line.trim().isEmpty()) words.add(line.trim());
+                }
+            }
+        } catch (Exception e) {
+            // ignore
+        }
+        return words;
+    }
+
+    private List<String> loadWordlistFromFile(String path) {
+        List<String> words = new ArrayList<>();
+        try {
+            Path p = Paths.get(path);
+            if (Files.exists(p)) {
+                for (String line : Files.readAllLines(p, StandardCharsets.UTF_8)) {
                     if (!line.trim().isEmpty()) words.add(line.trim());
                 }
             }
