@@ -4,6 +4,7 @@ import fr.redteam.core.DefaultReport;
 import fr.redteam.core.Module;
 import fr.redteam.core.Report;
 import fr.redteam.core.Target;
+import fr.redteam.db.DatabaseManager;
 import fr.redteam.credential.HashCracker;
 import fr.redteam.credential.PasswordStrengthAnalyzer;
 import fr.redteam.output.ConsoleReporter;
@@ -18,7 +19,9 @@ import fr.redteam.web.PhishingHttpServer;
 import fr.redteam.web.PhishingPageGenerator;
 import fr.redteam.web.UrlShortener;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -115,6 +118,7 @@ public class RedTeamCli {
         System.out.println(Ansi.bold("  Rapport " + m.getName()));
         System.out.println(Ansi.CYAN + "  " + SEP_THIN + Ansi.RESET);
         reporter.output(report);
+        persistRun("cli", m.getName(), host, report);
     }
 
     private void runInteractive() {
@@ -156,6 +160,7 @@ public class RedTeamCli {
         System.out.println(Ansi.bold("  Rapport HashCracker"));
         System.out.println(Ansi.CYAN + "  " + SEP_THIN + Ansi.RESET);
         reporter.output(report);
+        persistRun("cli", "HashCracker", hashOrPath, report);
     }
 
     private void runPhishingMenu(Scanner scan) {
@@ -276,6 +281,15 @@ public class RedTeamCli {
             }
             System.out.println(Ansi.dim("  Les identifiants et clics s'afficheront ici."));
             System.out.println(Ansi.CYAN + "  " + SEP_THIN + Ansi.RESET);
+
+            List<String> findings = new ArrayList<>();
+            findings.add("Template: " + template);
+            findings.add("URL: " + publicUrl);
+            if (wantShortener && finalUrl != null) findings.add("Shortener: " + finalUrl);
+            if (wantQr && qrFilePath != null) findings.add("QR: " + qrFilePath);
+            if (wantHomograph && homographFilePath != null) findings.add("Homograph: " + homographFilePath);
+            DatabaseManager.saveRun("cli", "PhishingAssistant", template, findings);
+
             System.out.print(Ansi.dim("  [Entrée] pour arrêter et revenir au menu › "));
             scan.nextLine();
 
@@ -341,6 +355,7 @@ public class RedTeamCli {
         modules.get("qrcodegenerator").run(target, report);
         System.out.println(Ansi.CYAN + "\n  " + SEP_THIN + Ansi.RESET);
         reporter.output(report);
+        persistRun("cli", "QrCodeGenerator", url, report);
     }
 
     private void runSubdomainTakeover(Scanner scan) {
@@ -355,6 +370,7 @@ public class RedTeamCli {
         modules.get("subdomaintakeoverchecker").run(target, report);
         System.out.println(Ansi.CYAN + "\n  " + SEP_THIN + Ansi.RESET);
         reporter.output(report);
+        persistRun("cli", "SubdomainTakeoverChecker", domain, report);
     }
 
     private void startUrlShortener(Scanner scan) {
@@ -400,6 +416,7 @@ public class RedTeamCli {
         modules.get("passwordstrengthanalyzer").run(target, report);
         System.out.println(Ansi.CYAN + "\n  " + SEP_THIN + Ansi.RESET);
         reporter.output(report);
+        persistRun("cli", "PasswordStrengthAnalyzer", password, report);
     }
 
     private void runHomographGenerator(Scanner scan) {
@@ -414,6 +431,7 @@ public class RedTeamCli {
         modules.get("homographgenerator").run(target, report);
         System.out.println(Ansi.CYAN + "\n  " + SEP_THIN + Ansi.RESET);
         reporter.output(report);
+        persistRun("cli", "HomographGenerator", domain, report);
     }
 
     private static int parseInt(String s, int def) {
@@ -423,5 +441,9 @@ public class RedTeamCli {
         } catch (NumberFormatException e) {
             return def;
         }
+    }
+
+    private void persistRun(String source, String module, String target, Report report) {
+        DatabaseManager.saveRun(source, module, target, report != null ? report.getFindings() : List.of());
     }
 }

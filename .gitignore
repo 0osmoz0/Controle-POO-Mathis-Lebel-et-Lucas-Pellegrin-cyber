@@ -1,6 +1,7 @@
 # Build
 redteam-tool/target/
 target/
+redteam-tool/data/
 
 # macOS
 .DS_Store

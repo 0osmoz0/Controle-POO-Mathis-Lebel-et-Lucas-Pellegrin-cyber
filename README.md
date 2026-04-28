@@ -55,6 +55,8 @@ cd redteam-tool
 
 Ouvre le dashboard sur **http://127.0.0.1:7070** — interface Bootstrap avec tous les modules.
 
+Les exécutions sont historisées automatiquement dans `redteam-tool/data/redteam_runs.jsonl`.
+
 ### Autres commandes
 
 ```bash
@@ -105,6 +107,7 @@ java -jar target/redteam-tool-1.0-SNAPSHOT.jar
 | **recon** | `SubdomainTakeoverChecker` |
 | **web** | `PhishingHttpServer`, `PhishingPageGenerator`, `CredentialHarvester`, `UrlShortener`, `DashboardServer` |
 | **output** | `Reporter`, `ConsoleReporter` |
+| **db** | `DatabaseManager` (base locale JSONL des exécutions) |
 | **util** | `Ansi` (couleurs terminal), `NgrokHelper` |
 
 ### Principes appliqués

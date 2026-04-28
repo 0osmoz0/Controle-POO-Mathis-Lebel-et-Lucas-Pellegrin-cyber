@@ -6,6 +6,7 @@ import fr.redteam.core.DefaultReport;
 import fr.redteam.core.Module;
 import fr.redteam.core.Report;
 import fr.redteam.core.Target;
+import fr.redteam.db.DatabaseManager;
 import fr.redteam.credential.HashCracker;
 import fr.redteam.credential.PasswordStrengthAnalyzer;
 import fr.redteam.phishing.HomographGenerator;
@@ -119,6 +120,7 @@ public class DashboardServer {
         }
         Report report = new DefaultReport();
         m.run(new Target(host, port), report);
+        DatabaseManager.saveRun("gui", m.getName(), host, report.getFindings());
         sendJson(ex, 200, Map.of("findings", report.getFindings()));
     }
 
@@ -171,6 +173,17 @@ public class DashboardServer {
         out.put("shortener", shortenerUrl);
         out.put("qrFile", qrFilePath);
         out.put("homographFile", homographFilePath);
+        DatabaseManager.saveRun(
+                "gui",
+                "PhishingAssistant",
+                template,
+                List.of(
+                        "URL: " + publicUrl,
+                        "Shortener: " + (shortenerUrl == null ? "" : shortenerUrl),
+                        "QR: " + (qrFilePath == null ? "" : qrFilePath),
+                        "Homograph: " + (homographFilePath == null ? "" : homographFilePath)
+                )
+        );
         sendJson(ex, 200, out);
     }
 
