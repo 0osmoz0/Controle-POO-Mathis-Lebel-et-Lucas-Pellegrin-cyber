@@ -1,0 +1,7 @@
+.git
+.gitignore
+.DS_Store
+target
+data
+src/main/resources/wordlists/rockyou.txt
+src/main/resources/wordlists/rockyou.txt.gz

@@ -72,6 +72,30 @@ mvn clean package
 java -jar target/redteam-tool-1.0-SNAPSHOT.jar
 ```
 
+### Docker (CLI + GUI)
+
+```bash
+# depuis la racine du repo
+docker compose up --build
+```
+
+- Lance le dashboard GUI sur `http://127.0.0.1:7070`
+- Expose aussi `8080` (phishing) et `9090` (shortener)
+- Persiste les runs DB dans `redteam-tool/data/`
+- Monte les wordlists locales depuis `redteam-tool/src/main/resources/wordlists/`
+
+Mode CLI dans Docker :
+
+```bash
+docker compose run --rm -e APP_MODE=cli redteam-tool
+```
+
+Exécuter un module directement :
+
+```bash
+docker compose run --rm redteam-tool run hashcracker <hash>
+```
+
 ---
 
 ## Techniques utilisées

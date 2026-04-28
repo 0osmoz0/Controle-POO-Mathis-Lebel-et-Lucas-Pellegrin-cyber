@@ -1,0 +1,17 @@
+services:
+  redteam-tool:
+    build:
+      context: ./redteam-tool
+      dockerfile: Dockerfile
+    container_name: redteam-tool
+    environment:
+      APP_MODE: gui
+    ports:
+      - "${GUI_PORT:-7070}:7070"
+      - "${PHISHING_PORT:-8080}:8080"
+      - "${SHORTENER_PORT:-9090}:9090"
+    volumes:
+      - ./redteam-tool/data:/app/data
+      - ./redteam-tool/src/main/resources/wordlists:/app/src/main/resources/wordlists:ro
+    stdin_open: true
+    tty: true
