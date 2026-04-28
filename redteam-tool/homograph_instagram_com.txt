@@ -1,0 +1,17 @@
+# Domaines homographes pour instagram.com
+# Punycode = format pour enregistrement
+
+instаgrаm.com | xn--instgrm-5fgc.com
+instagram.cоm | instagram.xn--cm-fmc
+instagram.сom | instagram.xn--om-nmc
+іnstagram.com | xn--nstagram-shh.com
+instagram.cοm | instagram.xn--cm-jbc
+instаgrаm.cоm | xn--instgrm-5fgc.xn--cm-fmc
+instаgrаm.сom | xn--instgrm-5fgc.xn--om-nmc
+іnstаgrаm.com | xn--nstgrm-5nfc94a.com
+instаgrаm.cοm | xn--instgrm-5fgc.xn--cm-jbc
+instagram.соm | instagram.xn--m-0tbi
+іnstagram.cоm | xn--nstagram-shh.xn--cm-fmc
+іnstagram.сom | xn--nstagram-shh.xn--om-nmc
+instagram.сοm | instagram.xn--m-rmb30b
+іnstagram.cοm | xn--nstagram-shh.xn--cm-jbc

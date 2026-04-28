@@ -1,0 +1,23 @@
+# Domaines homographes pour netflix.com
+# Punycode = format pour enregistrement
+
+netflix.cоm | netflix.xn--cm-fmc
+nеtflix.com | xn--ntflix-3of.com
+netflix.сom | netflix.xn--om-nmc
+netfliх.com | xn--netfli-gsf.com
+netflіx.com | xn--netflx-tvf.com
+netflix.cοm | netflix.xn--cm-jbc
+nеtflix.cоm | xn--ntflix-3of.xn--cm-fmc
+netflix.соm | netflix.xn--m-0tbi
+netfliх.cоm | xn--netfli-gsf.xn--cm-fmc
+netflіx.cоm | xn--netflx-tvf.xn--cm-fmc
+nеtflix.сom | xn--ntflix-3of.xn--om-nmc
+nеtfliх.com | xn--ntfli-zwe0j.com
+nеtflіx.com | xn--ntflx-zwe8u.com
+nеtflix.cοm | xn--ntflix-3of.xn--cm-jbc
+netfliх.сom | xn--netfli-gsf.xn--om-nmc
+netflіx.сom | xn--netflx-tvf.xn--om-nmc
+netflix.сοm | netflix.xn--m-rmb30b
+netflіх.com | xn--netfl-uze2j.com
+netfliх.cοm | xn--netfli-gsf.xn--cm-jbc
+netflіx.cοm | xn--netflx-tvf.xn--cm-jbc

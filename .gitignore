@@ -2,5 +2,9 @@
 redteam-tool/target/
 target/
 
+# macOS
+.DS_Store
+**/.DS_Store
+
 # Wordlist trop lourde pour le repo sans LFS (télécharger à part ou utiliser après "git lfs install")
 redteam-tool/src/main/resources/wordlists/rockyou.txt
